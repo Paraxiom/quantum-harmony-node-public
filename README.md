@@ -51,18 +51,26 @@ cd quantum-harmony-node-public
 # Run setup (installs QSSH, generates keys)
 ./setup.sh
 
-# Start with one command
+# Start with one command — node + dashboard come up together
 ./start.sh
 ```
 
-Or manually:
+The operator dashboard launches automatically at **http://localhost:8080**.
+
+### Start Options
+
+| Command | What it does |
+| --- | --- |
+| `./start.sh` | Node + LCARS dashboard (default) |
+| `./start.sh --bootstrap` | Download chain snapshot first, then start (recommended for first-time setup) |
+| `./start.sh --full` | Full stack: node + dashboard + faucet + KYC + QRNG (requires `.env`) |
+
+### Manual Start
 
 ```bash
-docker-compose up -d
-docker-compose logs -f node
+docker-compose -f docker-compose.operator.yml up -d
+docker-compose -f docker-compose.operator.yml logs -f
 ```
-
-Open http://localhost:8080 for the operator dashboard.
 
 ## Architecture
 
