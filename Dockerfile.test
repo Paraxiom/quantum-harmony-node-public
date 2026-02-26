@@ -1,0 +1,8 @@
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y curl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+COPY quantumharmony-node /usr/local/bin/quantumharmony-node
+RUN chmod +x /usr/local/bin/quantumharmony-node
+
+ENTRYPOINT ["/usr/local/bin/quantumharmony-node"]

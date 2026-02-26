@@ -1,0 +1,78 @@
+# QuantumHarmony Node - Simple Operator Setup
+# Just the node + dashboard - no KYC/DB services
+#
+# Usage: docker-compose -f docker-compose.operator.yml up
+
+services:
+  node:
+    image: sylvaincormier/quantumharmony-node:notarial-rpc
+    container_name: quantumharmony-node
+    restart: unless-stopped
+    user: "0:0"
+    ports:
+      - "9944:9944"
+      - "30333:30333"
+      - "9615:9615"
+    volumes:
+      - node-data:/data
+      - ./configs/chain-spec.json:/config/chainspec.json:ro
+    entrypoint: ["/usr/local/bin/quantumharmony-node"]
+    command:
+      - "--chain=/config/chainspec.json"
+      - "--sync=full"
+      - "--base-path=/data"
+      - "--name=${NODE_NAME:-Operator}"
+      - "--rpc-external"
+      - "--rpc-cors=all"
+      - "--rpc-methods=Unsafe"
+      - "--rpc-port=9944"
+      - "--port=30333"
+      - "--prometheus-port=9615"
+      - "--prometheus-external"
+      - "--database=rocksdb"
+      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWLmphH9JtAVntVnZ4fZ5keJSjKEyWFANcKVzWVLnwVe9Z"
+      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWKm6a7swhgeQTehbUaR5aweet7Q8zvVXif3kCRyiKXEWc"
+      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWLuQgPb7Z1vfEDyeFibvcv9x7cdLUHs1HohBLitbQeX7A"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:9944/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  dashboard:
+    image: nginx:alpine
+    container_name: quantumharmony-dashboard
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./dashboard:/usr/share/nginx/html:ro
+      - ./configs/nginx-dashboard.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - node
+
+  updater:
+    build: ./updater
+    container_name: quantumharmony-updater
+    restart: unless-stopped
+    environment:
+      - IMAGE=sylvaincormier/quantumharmony-node
+      - IMAGE_TAG=notarial-rpc
+      - UPDATE_INTERVAL=86400
+      - MONITOR_INTERVAL=60
+      - HEALTH_TIMEOUT=180
+      - HEALTH_URL=http://localhost:9944/health
+      - NODE_CONTAINER=quantumharmony-node
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    network_mode: host
+    depends_on:
+      - node
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  node-data:

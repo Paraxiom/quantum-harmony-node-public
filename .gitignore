@@ -1,0 +1,19 @@
+# Environment
+.env
+
+# Certificates (add your own)
+certs/*.pem
+certs/*.key
+certs/*.crt
+
+# Node data
+node-data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

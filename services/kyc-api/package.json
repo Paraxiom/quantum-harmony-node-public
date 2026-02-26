@@ -1,0 +1,18 @@
+{
+  "name": "quantumharmony-kyc-api",
+  "version": "1.0.0",
+  "description": "KYC Document Storage API for QuantumHarmony",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "multer": "^1.4.5-lts.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4"
+  }
+}
