@@ -105,15 +105,38 @@ docker-compose -f docker-compose.operator.yml logs -f
 | dashboard | 8080   | Operator web UI        |
 | nginx     | 80/443 | Reverse proxy          |
 
-## Dashboard Features
+## LCARS Dashboard Guide
 
-- **Status**: Block height, peers, sync status
-- **Transfer**: Send QMHY tokens
-- **Faucet**: Request test tokens
-- **Keys**: Validator key management
-- **Quantum**: Post-quantum security status
-- **Network**: Peer connections and topology
-- **Quests**: Gamified onboarding (Devonomics)
+The dashboard launches automatically at **http://localhost:8080** when you run `./start.sh`. It's a Star Trek LCARS-styled operator interface with 12 tabs:
+
+| Tab | What it does |
+| --- | --- |
+| **STATUS** | Block height, peer count, sync progress, finalized head. Check here first to confirm your node is syncing. |
+| **TRANSFER** | Send QMHY tokens to any address. Paste your account key to sign transactions. |
+| **FAUCET** | Request test tokens for your account. Click once, wait for confirmation. |
+| **GOVERN** | On-chain governance: view proposals, vote, submit motions. |
+| **REWARDS** | Track your validator rewards and staking performance. |
+| **RUNTIME** | Runtime version info and upgrade status. |
+| **KEYS** | Generate session keys, check keystore, rotate keys. Essential for validator setup. |
+| **QUANTUM** | Post-quantum security status — SPHINCS+/Falcon key health and algorithm info. |
+| **NETWORK** | Live peer map, connection topology, bootnode status. |
+| **SIGNALS** | Network signals and event stream. |
+| **PROOFS** | On-chain proof verification and attestation status. |
+| **QUESTS** | Gamified onboarding (Devonomics) — earn QMHY by completing validator milestones. |
+| **SETTINGS** | Node name, RPC endpoint, display preferences. |
+
+### First-time walkthrough
+
+1. Open **http://localhost:8080**
+2. Check **STATUS** — wait until sync progress shows blocks increasing
+3. Go to **KEYS** → click **CHECK KEYSTORE** to see current state
+4. Go to **FAUCET** → request test tokens
+5. Go to **KEYS** → **ROTATE SESSION KEYS** to generate your validator keys
+6. Send your account address, peer ID, and session keys to the network admin (see [Become a Validator](#become-a-validator) below)
+
+### Coming soon: Agent Mode
+
+We're building an autonomous node operator agent that monitors health, handles upgrades, and manages governance actions — with a dashboard approval flow for critical decisions. Stay tuned.
 
 ## Devonomics: Gamified Onboarding
 
