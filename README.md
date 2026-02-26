@@ -2,6 +2,8 @@
 
 Run a QuantumHarmony node with one command using Docker.
 
+**QuantumHarmony** is a post-quantum Layer 1 blockchain secured with SPHINCS+ and Falcon-512 signatures — 950 Rust tests, 32 Lean 4 theorems, zero sorries.
+
 ## Prerequisites
 
 **Install Docker:**
@@ -43,8 +45,8 @@ docker-compose --version
 
 ```bash
 # Clone the repo
-git clone https://github.com/Paraxiom/quantum-harmony-node.git
-cd quantum-harmony-node
+git clone https://github.com/Paraxiom/quantum-harmony-node-public.git
+cd quantum-harmony-node-public
 
 # Run setup (installs QSSH, generates keys)
 ./setup.sh
@@ -182,8 +184,8 @@ Follow these steps to join the network as a validator:
 ### Step 1: Start Your Node
 
 ```bash
-git clone https://github.com/Paraxiom/quantum-harmony-node.git
-cd quantum-harmony-node
+git clone https://github.com/Paraxiom/quantum-harmony-node-public.git
+cd quantum-harmony-node-public
 docker-compose up -d
 ```
 
@@ -310,8 +312,8 @@ If you modify your configuration file but the node continues to throw old errors
 ```bash
 docker-compose down -v
 docker-compose up -d
+```
 
 ## License
 
 Apache-2.0
-```
