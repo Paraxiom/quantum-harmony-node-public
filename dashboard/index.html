@@ -775,6 +775,7 @@
             <button class="nav-btn" onclick="showPanel('keys')">KEYS</button>
             <button class="nav-btn" onclick="showPanel('quantum')">QUANTUM</button>
             <button class="nav-btn" onclick="showPanel('network')">NETWORK</button>
+            <button class="nav-btn" onclick="showPanel('agent')" id="navAgent" style="position: relative;">AGENT<span id="agentNavBadge" style="display:none; position:absolute; top:4px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--accent-danger); box-shadow:0 0 6px var(--accent-danger);"></span></button>
             <button class="nav-btn" onclick="showPanel('signals')">SIGNALS</button>
             <button class="nav-btn" onclick="showPanel('proofs')">PROOFS</button>
             <button class="nav-btn" onclick="showPanel('devonomics')" style="background: linear-gradient(135deg, #f8a100, #ff6b00);">QUESTS</button>
@@ -2278,6 +2279,68 @@
                     </div>
                 </div>
 
+                <!-- AGENT PANEL -->
+                <div id="panel-agent" class="panel">
+                    <h2 class="panel-title">Agent Monitor</h2>
+
+                    <!-- Connection + Toggle Row -->
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                        <div id="agentConnPill" style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 100px; background: rgba(239,83,80,0.15); border: 1px solid var(--accent-danger);">
+                            <span id="agentConnDot" style="width: 10px; height: 10px; border-radius: 50%; background: var(--accent-danger); box-shadow: 0 0 8px var(--accent-danger);"></span>
+                            <span id="agentConnText" style="font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 600; color: var(--accent-danger);">Disconnected</span>
+                        </div>
+                        <button id="agentToggleBtn" onclick="toggleAgentMode()" style="
+                            padding: 10px 28px;
+                            border: none;
+                            border-radius: 8px;
+                            font-family: 'Orbitron', monospace;
+                            font-size: 13px;
+                            font-weight: 700;
+                            letter-spacing: 2px;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            background: linear-gradient(135deg, #ef5350, #b71c1c);
+                            color: #fff;
+                            box-shadow: 0 0 12px rgba(239,83,80,0.3);
+                        ">AGENT OFF</button>
+                    </div>
+
+                    <!-- Service Health Grid -->
+                    <div class="section-title">Service Health</div>
+                    <div class="stats-grid" id="agentHealthGrid">
+                        <div class="stat-card" id="agentSvc-node">
+                            <div class="stat-label">NODE</div>
+                            <div class="stat-value" id="agentSvcStatus-node" style="color: var(--text-muted);">---</div>
+                        </div>
+                        <div class="stat-card" id="agentSvc-dashboard">
+                            <div class="stat-label">DASHBOARD</div>
+                            <div class="stat-value" id="agentSvcStatus-dashboard" style="color: var(--text-muted);">---</div>
+                        </div>
+                    </div>
+
+                    <!-- Live Event Feed -->
+                    <div class="section-title" style="margin-top: 24px; display: flex; align-items: center; gap: 8px;">
+                        Live Events
+                        <button class="btn btn-sm" onclick="clearAgentFeed()" style="margin-left: auto;">CLEAR</button>
+                    </div>
+                    <div id="agentEventFeed" class="terminal" style="height: 320px; overflow-y: auto; font-size: 12px;">
+                        <div class="terminal-line info">Waiting for agent connection...</div>
+                    </div>
+
+                    <!-- Setup Instructions (shown when disconnected) -->
+                    <div id="agentSetupBox" style="margin-top: 24px; padding: 20px; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid var(--lcars-gold);">
+                        <div style="font-family: 'Orbitron', monospace; font-size: 13px; color: var(--lcars-gold); margin-bottom: 12px;">SETUP INSTRUCTIONS</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                            The qh-agent monitors your node and dashboard services, auto-remediates issues, and reports health status.<br><br>
+                            <strong style="color: var(--text-primary);">To start the agent:</strong><br>
+                            <code style="display: inline-block; margin-top: 4px; padding: 4px 10px; background: var(--bg-surface); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--lcars-gold-light);">docker compose -f docker-compose.operator.yml up -d agent</code><br><br>
+                            <strong style="color: var(--text-primary);">Or start the full stack:</strong><br>
+                            <code style="display: inline-block; margin-top: 4px; padding: 4px 10px; background: var(--bg-surface); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--lcars-gold-light);">docker compose -f docker-compose.operator.yml up -d</code><br><br>
+                            The agent will automatically connect via WebSocket and begin streaming health events.
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -3140,33 +3203,109 @@
 
             if (agentModeEnabled) {
                 log('AGENT MODE ENABLED - Auto-stake active, governance requires manual intervention', 'warning');
+                connectAgentFeed();
             } else {
                 log('Agent Mode disabled - Full manual control', 'info');
+                if (agentWs) { agentWs.close(); agentWs = null; }
             }
         }
 
         function updateAgentModeUI() {
-            // Agent Mode is stealth - only show status in private menu
-            // No public banner to prevent strategy revelation
             const statusEl = document.getElementById('agentModeStatus');
+            const toggleBtn = document.getElementById('agentToggleBtn');
 
             if (agentModeEnabled) {
                 statusEl.textContent = 'ON';
                 statusEl.style.color = 'var(--accent-success)';
+                if (toggleBtn) {
+                    toggleBtn.textContent = 'AGENT ON';
+                    toggleBtn.style.background = 'linear-gradient(135deg, #22c997, #0d7a54)';
+                    toggleBtn.style.boxShadow = '0 0 12px rgba(34,201,151,0.3)';
+                }
             } else {
                 statusEl.textContent = 'OFF';
                 statusEl.style.color = 'var(--accent-danger)';
+                if (toggleBtn) {
+                    toggleBtn.textContent = 'AGENT OFF';
+                    toggleBtn.style.background = 'linear-gradient(135deg, #ef5350, #b71c1c)';
+                    toggleBtn.style.boxShadow = '0 0 12px rgba(239,83,80,0.3)';
+                }
             }
         }
 
         // Auto-stake check (runs when agent mode is enabled)
         async function checkAutoStake() {
             if (!agentModeEnabled) return;
-
-            // In agent mode, automatically compound rewards
-            // Note: This does NOT vote - governance always requires human
             rewardsLog('Agent Mode: Checking for auto-stake opportunities...', 'info');
-            // Would call the staking RPC here
+        }
+
+        // ===========================================
+        // AGENT PANEL FUNCTIONS
+        // ===========================================
+
+        function updateAgentConnStatus(connected) {
+            const pill = document.getElementById('agentConnPill');
+            const dot = document.getElementById('agentConnDot');
+            const text = document.getElementById('agentConnText');
+            const setup = document.getElementById('agentSetupBox');
+
+            if (connected) {
+                pill.style.background = 'rgba(34,201,151,0.15)';
+                pill.style.borderColor = 'var(--accent-success)';
+                dot.style.background = 'var(--accent-success)';
+                dot.style.boxShadow = '0 0 8px var(--accent-success)';
+                text.textContent = 'Connected';
+                text.style.color = 'var(--accent-success)';
+                if (setup) setup.style.display = 'none';
+            } else {
+                pill.style.background = 'rgba(239,83,80,0.15)';
+                pill.style.borderColor = 'var(--accent-danger)';
+                dot.style.background = 'var(--accent-danger)';
+                dot.style.boxShadow = '0 0 8px var(--accent-danger)';
+                text.textContent = 'Disconnected';
+                text.style.color = 'var(--accent-danger)';
+                if (setup) setup.style.display = 'block';
+            }
+        }
+
+        function updateAgentServiceCard(service, healthy) {
+            const el = document.getElementById('agentSvcStatus-' + service);
+            if (!el) {
+                const grid = document.getElementById('agentHealthGrid');
+                if (grid) {
+                    const card = document.createElement('div');
+                    card.className = 'stat-card';
+                    card.id = 'agentSvc-' + service;
+                    card.innerHTML = '<div class="stat-label">' + service.toUpperCase() + '</div>' +
+                        '<div class="stat-value" id="agentSvcStatus-' + service + '" style="color: var(--text-muted);">---</div>';
+                    grid.appendChild(card);
+                }
+                const newEl = document.getElementById('agentSvcStatus-' + service);
+                if (newEl) {
+                    newEl.textContent = healthy ? 'HEALTHY' : 'DOWN';
+                    newEl.style.color = healthy ? 'var(--accent-success)' : 'var(--accent-danger)';
+                }
+                return;
+            }
+            el.textContent = healthy ? 'HEALTHY' : 'DOWN';
+            el.style.color = healthy ? 'var(--accent-success)' : 'var(--accent-danger)';
+        }
+
+        function agentFeedLog(message, type) {
+            const feed = document.getElementById('agentEventFeed');
+            if (!feed) return;
+            const line = document.createElement('div');
+            line.className = 'terminal-line ' + (type || 'info');
+            const ts = new Date().toLocaleTimeString();
+            line.textContent = '[' + ts + '] ' + message;
+            feed.appendChild(line);
+            feed.scrollTop = feed.scrollHeight;
+            while (feed.children.length > 200) feed.removeChild(feed.firstChild);
+        }
+
+        function clearAgentFeed() {
+            const feed = document.getElementById('agentEventFeed');
+            if (feed) feed.innerHTML = '<div class="terminal-line info">Console cleared</div>';
         }
 
         // Log level: 0=errors only, 1=info, 2=verbose (shows all RPC)
@@ -3625,7 +3764,8 @@
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('panel-' + name).classList.add('active');
-            event.target.classList.add('active');
+            const btn = event.target.closest('.nav-btn') || event.target;
+            btn.classList.add('active');
         }
 
         // Status Updates
@@ -5982,8 +6122,9 @@
             // Refresh on-chain forum messages every 30 seconds
             setInterval(loadChainForumMessages, 30000);
 
-            // Connect to agent WebSocket feed for live activity
-            connectAgentFeed();
+            // Initialize agent panel UI and connect if previously enabled
+            updateAgentModeUI();
+            if (agentModeEnabled) connectAgentFeed();
 
             log('Dashboard initialized - all panels active', 'info');
         }
@@ -6063,36 +6204,59 @@
         }
 
         // Agent WebSocket feed — streams live health events and remediations
-        // Connects to agent on port 8090 (same host, different port via qssh tunnel)
+        // Connects via /agent/ws (nginx-proxied to agent:8090)
+        let agentWs = null;
+        let agentReconnectTimer = null;
+
         function connectAgentFeed() {
-            const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${proto}//${window.location.hostname}:8090/ws`;
-            let ws;
+            if (agentWs && agentWs.readyState <= 1) return;
+
+            const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = proto + '//' + location.host + '/agent/ws';
+
             try {
-                ws = new WebSocket(wsUrl);
+                agentWs = new WebSocket(wsUrl);
             } catch (e) {
-                console.warn('[AgentFeed] WebSocket not available:', e.message);
+                updateAgentConnStatus(false);
                 return;
             }
-            window.agentWs = ws;
-            ws.onopen = () => {
+
+            agentWs.onopen = () => {
+                updateAgentConnStatus(true);
+                agentFeedLog('Connected to qh-agent', 'info');
                 log('[Agent] Connected to agent feed', 'success');
+                if (agentReconnectTimer) { clearTimeout(agentReconnectTimer); agentReconnectTimer = null; }
             };
-            ws.onmessage = (e) => {
+
+            agentWs.onmessage = (e) => {
                 try {
                     const d = JSON.parse(e.data);
+
                     if (d.type === 'health_event') {
                         const isUnhealthy = d.kind === 'ServiceUnhealthy' || d.kind === 'NetworkAliasMissing';
                         const isRecovered = d.kind === 'ServiceRecovered';
+                        const healthy = isRecovered || (!isUnhealthy && d.kind !== 'ServiceDown');
                         const type = isUnhealthy ? 'error' : isRecovered ? 'success' : 'info';
-                        log(`[Agent] ${d.service}: ${d.kind} — ${d.detail}`, type);
+                        const svc = d.service || 'unknown';
+                        updateAgentServiceCard(svc, healthy);
+                        agentFeedLog(`[${svc}] ${d.kind} — ${d.detail || ''}`, type);
+                        log(`[Agent] ${svc}: ${d.kind} — ${d.detail}`, type);
                     } else if (d.type === 'remediation') {
-                        const type = d.result === 'success' || d.result === 'governance_approved' ? 'success' : 'error';
+                        const ok = d.result === 'success' || d.result === 'governance_approved';
+                        const type = ok ? 'success' : 'error';
+                        agentFeedLog(`[REMEDIATION] ${d.service}: ${d.rule} — ${d.result}`, type);
                         log(`[Agent] ${d.rule} on ${d.service}: ${d.result}`, type);
                     } else if (d.type === 'status_update') {
-                        const summary = d.services.map(s => `${s.name}:${s.state}`).join(' ');
+                        const services = d.services || [];
+                        services.forEach(s => {
+                            updateAgentServiceCard(s.name, s.state === 'healthy' || s.state === 'running');
+                        });
+                        const summary = services.map(s => `${s.name}:${s.state}`).join(' ');
                         log(`[Agent] Status: ${summary}`, 'info');
                     } else if (d.type === 'governance_request') {
+                        const badge = document.getElementById('agentNavBadge');
+                        if (badge) badge.style.display = 'block';
+                        agentFeedLog(`[GOVERNANCE] ${d.rule} on ${d.service} — approval required`, 'warning');
                         showGovernanceModal(d);
                         log(`[Governance] Approval required: ${d.rule} on ${d.service}`, 'warning');
                     }
@@ -6100,13 +6264,15 @@
                     console.warn('[AgentFeed] Parse error:', err);
                 }
             };
-            ws.onerror = () => {
-                // Silently ignore — agent may not be running
+
+            agentWs.onerror = () => {
+                updateAgentConnStatus(false);
             };
-            ws.onclose = () => {
-                window.agentWs = null;
-                // Auto-reconnect after 5 seconds
-                setTimeout(connectAgentFeed, 5000);
+
+            agentWs.onclose = () => {
+                updateAgentConnStatus(false);
+                agentFeedLog('Agent disconnected', 'warning');
+                agentReconnectTimer = setTimeout(connectAgentFeed, 5000);
             };
         }
 
