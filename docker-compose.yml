@@ -1,10 +1,10 @@
 # QuantumHarmony Node Operator
 # One-command deployment for node operators
 #
-# Production Validators (Updated 2026-01-28):
-#   - Validator 1 (Alice/Montreal):    51.79.26.123  - 12D3KooWLmphH9JtAVntVnZ4fZ5keJSjKEyWFANcKVzWVLnwVe9Z
-#   - Validator 2 (Bob/Beauharnois):   51.79.26.168  - 12D3KooWGiDT7jsuqFJhsvoN4KZp8KZ5CjtUnEvRxUNVNvLRwnFA (PRIMARY DB)
-#   - Validator 3 (Charlie/Frankfurt): 209.38.225.4  - 12D3KooWRzTbwny8fUNUZQvS24RJWj44RSivgCQNN6Bb6WwhTQNh
+# Production Validators (Updated 2026-02-27):
+#   - Validator 1 (Alice/Montreal):    51.79.26.123  - 12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+#   - Validator 2 (Bob/Beauharnois):   51.79.26.168  - 12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD (PRIMARY DB)
+#   - Validator 3 (Charlie/Frankfurt): 209.38.225.4  - 12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x
 #
 # Usage:
 #   docker-compose up -d
@@ -19,7 +19,7 @@ services:
   # CORE: QuantumHarmony Blockchain Node
   # =====================================================
   node:
-    image: sylvaincormier/quantumharmony-node:arm64
+    image: sylvaincormier/quantumharmony-node:v28.1-issues
     #platform: linux/amd64  # Commented - causes crypto issues under emulation on ARM Macs
     # Includes: forum module, SPHINCS+ signatures, all pallets
     container_name: quantumharmony-node
@@ -42,9 +42,9 @@ services:
       - "--rpc-external"
       - "--rpc-cors=all"
       - "--rpc-methods=Safe"
-      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWLmphH9JtAVntVnZ4fZ5keJSjKEyWFANcKVzWVLnwVe9Z"
-      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWGiDT7jsuqFJhsvoN4KZp8KZ5CjtUnEvRxUNVNvLRwnFA"
-      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWRzTbwny8fUNUZQvS24RJWj44RSivgCQNN6Bb6WwhTQNh"
+      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x"
       # Node generates unique identity on first run (stored in /data)
     environment:
       - NODE_NAME=${NODE_NAME:-Operator}

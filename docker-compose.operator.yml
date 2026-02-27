@@ -5,7 +5,7 @@
 
 services:
   node:
-    image: sylvaincormier/quantumharmony-node:notarial-rpc
+    image: sylvaincormier/quantumharmony-node:v28.1-issues
     container_name: quantumharmony-node
     restart: unless-stopped
     user: "0:0"
@@ -29,10 +29,10 @@ services:
       - "--port=30333"
       - "--prometheus-port=9615"
       - "--prometheus-external"
-      - "--database=rocksdb"
-      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWLmphH9JtAVntVnZ4fZ5keJSjKEyWFANcKVzWVLnwVe9Z"
-      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWKm6a7swhgeQTehbUaR5aweet7Q8zvVXif3kCRyiKXEWc"
-      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWLuQgPb7Z1vfEDyeFibvcv9x7cdLUHs1HohBLitbQeX7A"
+      - "--database=paritydb"
+      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x"
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:9944/health"]
       interval: 30s
@@ -58,7 +58,7 @@ services:
     restart: unless-stopped
     environment:
       - IMAGE=sylvaincormier/quantumharmony-node
-      - IMAGE_TAG=notarial-rpc
+      - IMAGE_TAG=v28.1-issues
       - UPDATE_INTERVAL=86400
       - MONITOR_INTERVAL=60
       - HEALTH_TIMEOUT=180

@@ -5,7 +5,7 @@
 # - Failed updates roll back to the previous working image
 
 IMAGE="${IMAGE:-sylvaincormier/quantumharmony-node}"
-TAG="${IMAGE_TAG:-notarial-rpc}"
+TAG="${IMAGE_TAG:-v28.1-issues}"
 UPDATE_INTERVAL="${UPDATE_INTERVAL:-86400}"   # 24 hours between image checks
 MONITOR_INTERVAL="${MONITOR_INTERVAL:-60}"    # 60s between health pings
 HEALTH_TIMEOUT="${HEALTH_TIMEOUT:-180}"       # 3 minutes for node to start

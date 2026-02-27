@@ -32,24 +32,31 @@ bootstrap() {
     docker volume rm "$VOLUME_NAME" 2>/dev/null
     docker volume create "$VOLUME_NAME" >/dev/null
 
-    # Download snapshot
+    # Download snapshot (if available)
     echo "Downloading chain snapshot..."
     echo "  Source: $SNAPSHOT_URL"
     echo ""
 
-    curl -fL --progress-bar "$SNAPSHOT_URL" | \
-        docker run --rm -i -v "$VOLUME_NAME":/data alpine \
-        sh -c 'mkdir -p /data/chains/dev3 && cd /data/chains/dev3 && tar xzf -'
+    if curl -sfI "$SNAPSHOT_URL" > /dev/null 2>&1; then
+        curl -fL --progress-bar "$SNAPSHOT_URL" | \
+            docker run --rm -i -v "$VOLUME_NAME":/data alpine \
+            sh -c 'mkdir -p /data/chains/quantumharmony_prod && cd /data/chains/quantumharmony_prod && tar xzf -'
 
-    if [ $? -ne 0 ]; then
-        echo ""
-        echo "ERROR: Snapshot download/extract failed."
-        echo "Check your internet connection and try again."
-        exit 1
+        if [ $? -ne 0 ]; then
+            echo ""
+            echo "WARNING: Snapshot download/extract failed."
+            echo "The node will sync from genesis (this may take a while)."
+        else
+            echo ""
+            echo "Snapshot applied."
+        fi
+    else
+        echo "Snapshot not available at $SNAPSHOT_URL"
+        echo "The node will sync from genesis (this may take a while)."
     fi
 
     echo ""
-    echo "Snapshot applied. Starting node..."
+    echo "Starting node..."
     echo ""
 
     # Start normally
