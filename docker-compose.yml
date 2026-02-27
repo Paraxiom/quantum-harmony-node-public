@@ -20,7 +20,7 @@ services:
   # =====================================================
   node:
     image: sylvaincormier/quantumharmony-node:v28.1-issues
-    #platform: linux/amd64  # Commented - causes crypto issues under emulation on ARM Macs
+    platform: linux/amd64
     # Includes: forum module, SPHINCS+ signatures, all pallets
     container_name: quantumharmony-node
     restart: unless-stopped

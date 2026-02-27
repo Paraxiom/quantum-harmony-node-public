@@ -6,6 +6,7 @@
 services:
   node:
     image: sylvaincormier/quantumharmony-node:v28.1-issues
+    platform: linux/amd64
     container_name: quantumharmony-node
     restart: unless-stopped
     user: "0:0"
