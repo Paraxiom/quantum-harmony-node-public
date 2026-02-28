@@ -5076,8 +5076,9 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    updateFaucetStatus(true, `Block: ${data.block_height || 'N/A'}`);
-                    faucetLog(`Faucet online - ${data.validators_online || 0} validators`, 'info');
+                    const bal = data.balance ? (BigInt(data.balance) / BigInt(10**18)).toString() + ' QMHY' : 'N/A';
+                    updateFaucetStatus(true, bal);
+                    faucetLog(`Faucet online — balance: ${bal}`, 'info');
                 } else {
                     updateFaucetStatus(false);
                     faucetLog(`Faucet returned error: ${response.status}`, 'error');
@@ -5177,8 +5178,8 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    faucetLog(`Drip sent! TX: ${result.tx_hash || 'pending'}`, 'info');
-                    faucetLog(`Amount: ${result.amount || '100 QMHY'}`, 'info');
+                    faucetLog(`Drip sent! TX: ${result.hash || result.tx_hash || 'pending'}`, 'info');
+                    faucetLog(`Amount: 100 QMHY — segment: ${result.segment || 'N/A'}`, 'info');
 
                     // Update rate limit and counter
                     lastDripTime[recipient] = now;
