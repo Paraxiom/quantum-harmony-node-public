@@ -21,7 +21,7 @@ TOTAL=0
 # Default endpoints
 DASHBOARD_URL="${DASHBOARD_URL:-http://localhost:8080}"
 RPC_URL="${RPC_URL:-http://localhost:9944}"
-FAUCET_URL="${FAUCET_URL:-http://51.79.26.123:8080}"
+FAUCET_URL="${FAUCET_URL:-https://paraxiom.org/faucet}"
 
 echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║      QuantumHarmony Dashboard Test Suite                 ║${NC}"
@@ -141,10 +141,11 @@ test_rpc "author_pendingExtrinsics" "author_pendingExtrinsics" "[]" "result"
 
 echo ""
 echo -e "${YELLOW}═══ Faucet Tests ═══${NC}"
-test_endpoint "Faucet status" "$FAUCET_URL/status" "GET" "" "running"
-test_endpoint "Faucet health" "$FAUCET_URL/health" "GET" "" "healthy"
-test_endpoint "Faucet proxy via dashboard" "$DASHBOARD_URL/faucet/status" "GET" "" "running"
-test_endpoint "Faucet health via dashboard" "$DASHBOARD_URL/faucet/health" "GET" "" "healthy"
+test_endpoint "Faucet health" "$FAUCET_URL/health" "GET" "" '"status":"ok"'
+test_endpoint "Faucet balance in health" "$FAUCET_URL/health" "GET" "" '"balance"'
+test_endpoint "Faucet info" "$FAUCET_URL/info" "GET" "" '"faucetAddress"'
+test_endpoint "Faucet drip" "$FAUCET_URL/drip" "POST" '{"address":"5CNSWiuva6KCUn5EKdf3iSxFV7U9AfrE382BayL2udVJJKs1"}' '"success":true'
+test_endpoint "Faucet cooldown" "$FAUCET_URL/drip" "POST" '{"address":"5CNSWiuva6KCUn5EKdf3iSxFV7U9AfrE382BayL2udVJJKs1"}' "Cooldown"
 
 echo ""
 echo -e "${YELLOW}═══ Network Connectivity ═══${NC}"
