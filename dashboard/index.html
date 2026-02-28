@@ -2318,6 +2318,40 @@
                         </div>
                     </div>
 
+                    <!-- Playwright Results -->
+                    <div class="section-title" style="margin-top: 24px;">Playwright Results</div>
+                    <div class="stats-grid" id="playwrightStatsGrid">
+                        <div class="stat-card">
+                            <div class="stat-label">LAST RUN</div>
+                            <div class="stat-value" id="pwLastRun" style="font-size: 13px; color: var(--text-muted);">---</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">PASSED</div>
+                            <div class="stat-value" id="pwPassed" style="color: var(--text-muted);">---</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">FAILED</div>
+                            <div class="stat-value" id="pwFailed" style="color: var(--text-muted);">---</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">SECTIONS</div>
+                            <div class="stat-value" id="pwSections" style="color: var(--text-muted);">---</div>
+                        </div>
+                    </div>
+                    <div id="pwFailedList" style="display: none; margin-top: 8px; padding: 10px 14px; background: rgba(239,83,80,0.08); border-radius: 6px; border: 1px solid rgba(239,83,80,0.2);">
+                        <div style="font-size: 11px; color: var(--accent-danger); font-family: 'Orbitron', monospace; margin-bottom: 6px;">FAILED SECTIONS</div>
+                        <div id="pwFailedSections" style="font-size: 12px; color: var(--text-secondary);"></div>
+                    </div>
+
+                    <!-- Attestation Chain -->
+                    <div class="section-title" style="margin-top: 24px; display: flex; align-items: center; gap: 8px;">
+                        Attestation Chain
+                        <button class="btn btn-sm" onclick="refreshAttestations()" style="margin-left: auto;">REFRESH</button>
+                    </div>
+                    <div id="attestationChain" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+                        <div style="font-size: 12px; color: var(--text-muted); padding: 12px;">No attestations loaded</div>
+                    </div>
+
                     <!-- Live Event Feed -->
                     <div class="section-title" style="margin-top: 24px; display: flex; align-items: center; gap: 8px;">
                         Live Events
@@ -3306,6 +3340,78 @@
         function clearAgentFeed() {
             const feed = document.getElementById('agentEventFeed');
             if (feed) feed.innerHTML = '<div class="terminal-line info">Console cleared</div>';
+        }
+
+        function updatePlaywrightStats(d) {
+            const lastRun = document.getElementById('pwLastRun');
+            const passed = document.getElementById('pwPassed');
+            const failed = document.getElementById('pwFailed');
+            const sections = document.getElementById('pwSections');
+            if (lastRun) {
+                const t = d.ts ? new Date(d.ts).toLocaleString() : new Date().toLocaleString();
+                lastRun.textContent = t;
+                lastRun.style.color = 'var(--text-primary)';
+            }
+            if (passed) {
+                passed.textContent = d.total_passed;
+                passed.style.color = 'var(--accent-success)';
+            }
+            if (failed) {
+                failed.textContent = d.total_failed;
+                failed.style.color = d.total_failed === 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+            }
+            if (sections) {
+                sections.textContent = d.sections;
+                sections.style.color = 'var(--text-primary)';
+            }
+            const failList = document.getElementById('pwFailedList');
+            const failSections = document.getElementById('pwFailedSections');
+            if (failList && failSections) {
+                if (d.failed_sections && d.failed_sections.length > 0) {
+                    failSections.textContent = d.failed_sections.join(', ');
+                    failList.style.display = 'block';
+                } else {
+                    failList.style.display = 'none';
+                }
+            }
+        }
+
+        let attestationInterval = null;
+
+        function refreshAttestations() {
+            const container = document.getElementById('attestationChain');
+            if (!container) return;
+            fetch('/agent/audit?limit=20')
+                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(entries => {
+                    if (!entries.length) {
+                        container.innerHTML = '<div style="font-size: 12px; color: var(--text-muted); padding: 12px;">No attestation entries found</div>';
+                        return;
+                    }
+                    container.innerHTML = '';
+                    entries.forEach(e => {
+                        const ok = e.action_result === 'success' || e.action_result === 'governance_approved';
+                        const color = ok ? 'var(--accent-success)' : e.action_result === 'dry_run' ? 'var(--lcars-gold)' : 'var(--accent-danger)';
+                        const sigShort = e.signature ? e.signature.substring(0, 16) + '...' : 'unsigned';
+                        const hashShort = e.hash ? e.hash.substring(0, 12) + '...' : '';
+                        const ts = new Date(e.timestamp).toLocaleString();
+                        const card = document.createElement('div');
+                        card.style.cssText = 'padding: 10px 14px; background: var(--bg-elevated); border-radius: 6px; border-left: 3px solid ' + color + '; font-size: 12px;';
+                        card.innerHTML =
+                            '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">' +
+                                '<span style="color: var(--text-primary); font-family: \'Orbitron\', monospace;">#' + e.seq + ' — ' + e.rule_name + '</span>' +
+                                '<span style="color: ' + color + ';">' + e.action_result + '</span>' +
+                            '</div>' +
+                            '<div style="color: var(--text-muted);">' + ts + '</div>' +
+                            '<div style="color: var(--text-muted); margin-top: 2px; font-family: monospace; font-size: 11px;" title="Hash: ' + (e.hash || '') + '">' +
+                                'hash: ' + hashShort + ' | sig: ' + sigShort +
+                            '</div>';
+                        container.appendChild(card);
+                    });
+                })
+                .catch(() => {
+                    container.innerHTML = '<div style="font-size: 12px; color: var(--text-muted); padding: 12px;">Agent not connected — attestations unavailable</div>';
+                });
         }
 
         // Log level: 0=errors only, 1=info, 2=verbose (shows all RPC)
@@ -6227,6 +6333,9 @@
                 agentFeedLog('Connected to qh-agent', 'info');
                 log('[Agent] Connected to agent feed', 'success');
                 if (agentReconnectTimer) { clearTimeout(agentReconnectTimer); agentReconnectTimer = null; }
+                refreshAttestations();
+                if (attestationInterval) clearInterval(attestationInterval);
+                attestationInterval = setInterval(refreshAttestations, 60000);
             };
 
             agentWs.onmessage = (e) => {
@@ -6260,6 +6369,12 @@
                         agentFeedLog(`[GOVERNANCE] ${d.rule} on ${d.service} — approval required`, 'warning');
                         showGovernanceModal(d);
                         log(`[Governance] Approval required: ${d.rule} on ${d.service}`, 'warning');
+                    } else if (d.type === 'playwright_report') {
+                        updatePlaywrightStats(d);
+                        const status = d.total_failed === 0 ? 'success' : 'error';
+                        const failInfo = d.failed_sections && d.failed_sections.length ? ` — Failed: ${d.failed_sections.join(', ')}` : '';
+                        agentFeedLog(`[PLAYWRIGHT] ${d.total_passed}/${d.total_passed + d.total_failed} passed (${d.sections} sections)${failInfo}`, status);
+                        log(`[Agent] Playwright: ${d.total_passed}/${d.total_passed + d.total_failed} passed`, status);
                     }
                 } catch (err) {
                     console.warn('[AgentFeed] Parse error:', err);
