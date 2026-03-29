@@ -708,6 +708,8 @@
     <script src="js/upgrade-manager.js"></script>
     <script src="js/keystore-manager.js"></script>
     <script src="js/governance-manager.js"></script>
+    <script src="js/extrinsics-manager.js"></script>
+    <script src="js/identity-manager.js"></script>
 </head>
 <body>
     <div class="lcars-frame">
@@ -778,6 +780,8 @@
             <button class="nav-btn" onclick="showPanel('agent')" id="navAgent" style="position: relative;">AGENT<span id="agentNavBadge" style="display:none; position:absolute; top:4px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--accent-danger); box-shadow:0 0 6px var(--accent-danger);"></span></button>
             <button class="nav-btn" onclick="showPanel('signals')">SIGNALS</button>
             <button class="nav-btn" onclick="showPanel('proofs')">PROOFS</button>
+            <button class="nav-btn" onclick="showPanel('identity')" style="background: linear-gradient(135deg, #22c997, #5c88da);">ID</button>
+            <button class="nav-btn" onclick="showPanel('extrinsics')" style="background: linear-gradient(135deg, #5c88da, #22c997);">EXTRINSICS</button>
             <button class="nav-btn" onclick="showPanel('devonomics')" style="background: linear-gradient(135deg, #f8a100, #ff6b00);">QUESTS</button>
             <div class="nav-spacer"></div>
             <button class="nav-btn" onclick="showPanel('settings')">SETTINGS</button>
@@ -796,9 +800,6 @@
                     <h2 class="panel-title">Node Status</h2>
 
                     <div class="control-bar">
-                        <button class="btn btn-success" onclick="startNode()" id="startBtn">START</button>
-                        <button class="btn btn-danger" onclick="stopNode()" id="stopBtn">STOP</button>
-                        <button class="btn btn-primary" onclick="restartNode()" id="restartBtn">RESTART</button>
                         <div class="status-pill" id="nodeProcessStatus">
                             <div class="dot"></div>
                             <span class="status-pill-text" id="nodeProcessText">Unknown</span>
@@ -1500,22 +1501,22 @@
 
                     <!-- Tab Navigation -->
                     <div style="display: flex; gap: 4px; margin-bottom: var(--space-3); border-bottom: 2px solid var(--lcars-gold-dark); padding-bottom: 8px;">
-                        <button class="btn btn-secondary reporter-tab active" onclick="showReporterTab('tao')" id="tab-tao">TAO INTELLIGENCE</button>
+                        <button class="btn btn-secondary reporter-tab active" onclick="showReporterTab('agents')" id="tab-agents">SIGNAL AGENTS</button>
                         <button class="btn btn-secondary reporter-tab" onclick="showReporterTab('qrng')" id="tab-qrng">QRNG POOL</button>
                         <button class="btn btn-secondary reporter-tab" onclick="showReporterTab('qkd')" id="tab-qkd">QKD ROUTING</button>
                         <button class="btn btn-secondary reporter-tab" onclick="showReporterTab('oracle')" id="tab-oracle">ORACLE</button>
                     </div>
 
-                    <!-- TAO INTELLIGENCE SECTION -->
-                    <div id="reporter-tao" class="reporter-section">
+                    <!-- SIGNAL AGENTS SECTION -->
+                    <div id="reporter-agents" class="reporter-section">
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="stat-label">SIGNAL API</div>
-                                <div class="stat-value green" id="taoApiStatus">LIVE</div>
+                                <div class="stat-value green" id="agentApiStatus">LIVE</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-label">TAO SUBNETS</div>
-                                <div class="stat-value blue" id="taoSubnetCount">32</div>
+                                <div class="stat-label">SIGNAL SOURCES</div>
+                                <div class="stat-value blue" id="agentSourceCount">32</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-label">X402 PROTOCOL</div>
@@ -1528,7 +1529,7 @@
                         </div>
 
                         <div class="section-title">Live Signal Feed</div>
-                        <div class="info-box" id="taoSignalFeed" style="max-height: 180px; overflow-y: auto;">
+                        <div class="info-box" id="agentSignalFeed" style="max-height: 180px; overflow-y: auto;">
                             <div class="info-row">
                                 <span class="info-label">SN8 (Taoshi)</span>
                                 <span class="info-value"><span style="color: var(--accent-success); font-weight: 600;">LONG</span> BTC <span style="color: var(--text-muted);">(87%)</span></span>
@@ -1548,7 +1549,7 @@
                         </div>
 
                         <div class="section-title" style="margin-top: var(--space-3);">Top Subnets by Emission</div>
-                        <div id="taoSubnetList" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                        <div id="agentSourceList" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
                             <div class="stat-card" style="padding: 8px;">
                                 <div class="stat-label" style="font-size: 9px;">SN8 Taoshi</div>
                                 <div class="stat-value" style="font-size: 14px; color: var(--accent-success);">18.2%</div>
@@ -1584,7 +1585,7 @@
                         </div>
 
                         <div style="display: flex; gap: 8px; margin-top: var(--space-3);">
-                            <button class="btn btn-primary" onclick="refreshTaoSignals()">REFRESH SIGNALS</button>
+                            <button class="btn btn-primary" onclick="refreshAgentSignals()">REFRESH SIGNALS</button>
                             <button class="btn btn-secondary" onclick="window.open('http://209.38.225.4/api/docs', '_blank')">API DOCS</button>
                         </div>
                     </div>
@@ -1644,6 +1645,7 @@
 
                         <div style="display: flex; gap: 8px; margin-top: var(--space-3);">
                             <button class="btn btn-primary" onclick="generateNewQrng()">GENERATE NEW</button>
+                            <button class="btn btn-success" onclick="fetchQrngFromNode()">FETCH FROM NODE</button>
                             <button class="btn btn-secondary" onclick="exportQrng()">EXPORT</button>
                             <button class="btn btn-secondary" onclick="configureQrng()">CONFIGURE</button>
                         </div>
@@ -1823,6 +1825,39 @@
                             <div class="info-row">
                                 <span class="info-label">#71,210</span>
                                 <span class="info-value">Weather: 22.6C | 2/3 agree | <span style="color: var(--accent-success);">Used</span></span>
+                            </div>
+                        </div>
+
+                        <!-- SIGNAL SUBSCRIPTION SECTION -->
+                        <div style="border-top: 2px solid var(--accent-info); margin-top: var(--space-4); padding-top: var(--space-3);">
+                            <div class="section-title">
+                                External Signals
+                                <div style="float: right;">
+                                    <button class="btn btn-primary" style="padding: 4px 12px; font-size: 11px; margin-right: 4px;" onclick="acceptExternalSignal()">+ ACCEPT</button>
+                                    <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 11px;" onclick="listMySubscriptions()">MY SUBS</button>
+                                </div>
+                            </div>
+
+                            <div class="info-box" id="availableSignalsList" style="max-height: 200px; overflow-y: auto;">
+                                <div style="color: var(--text-muted); text-align: center;">Loading available signals...</div>
+                            </div>
+                        </div>
+
+                        <!-- REPORTER APPROVAL SECTION -->
+                        <div style="border-top: 2px solid var(--lcars-gold-dark); margin-top: var(--space-4); padding-top: var(--space-3);">
+                            <div class="section-title">
+                                Reporter Approval
+                                <button class="btn btn-success" style="float: right; padding: 4px 12px; font-size: 11px;" onclick="proposeReporter()">+ PROPOSE</button>
+                            </div>
+
+                            <div class="section-title" style="font-size: 11px; margin-top: var(--space-2);">Pending Proposals</div>
+                            <div class="info-box" id="reporterProposalsList" style="max-height: 200px; overflow-y: auto;">
+                                <div style="color: var(--text-muted); text-align: center;">Loading...</div>
+                            </div>
+
+                            <div class="section-title" style="font-size: 11px; margin-top: var(--space-3);">Approved Reporters</div>
+                            <div class="info-box" id="approvedReportersList" style="max-height: 150px; overflow-y: auto;">
+                                <div style="color: var(--text-muted); text-align: center;">Loading...</div>
                             </div>
                         </div>
                     </div>
@@ -2081,6 +2116,16 @@
                     </div>
                 </div>
 
+                <!-- IDENTITY PANEL - PQ Soulbound NFT Identities -->
+                <div id="panel-identity" class="panel">
+                    <!-- Content populated by identity-manager.js initIdentityPanel() -->
+                </div>
+
+                <!-- EXTRINSICS PANEL - Pallet Explorer & Submission -->
+                <div id="panel-extrinsics" class="panel">
+                    <!-- Content populated by extrinsics-manager.js initExtrinsicsPanel() -->
+                </div>
+
                 <!-- DEVONOMICS PANEL - Gamified Onboarding Quests -->
                 <div id="panel-devonomics" class="panel">
                     <h2 class="panel-title">Devonomics: Validator Quests</h2>
@@ -2318,40 +2363,6 @@
                         </div>
                     </div>
 
-                    <!-- Playwright Results -->
-                    <div class="section-title" style="margin-top: 24px;">Playwright Results</div>
-                    <div class="stats-grid" id="playwrightStatsGrid">
-                        <div class="stat-card">
-                            <div class="stat-label">LAST RUN</div>
-                            <div class="stat-value" id="pwLastRun" style="font-size: 13px; color: var(--text-muted);">---</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">PASSED</div>
-                            <div class="stat-value" id="pwPassed" style="color: var(--text-muted);">---</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">FAILED</div>
-                            <div class="stat-value" id="pwFailed" style="color: var(--text-muted);">---</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">SECTIONS</div>
-                            <div class="stat-value" id="pwSections" style="color: var(--text-muted);">---</div>
-                        </div>
-                    </div>
-                    <div id="pwFailedList" style="display: none; margin-top: 8px; padding: 10px 14px; background: rgba(239,83,80,0.08); border-radius: 6px; border: 1px solid rgba(239,83,80,0.2);">
-                        <div style="font-size: 11px; color: var(--accent-danger); font-family: 'Orbitron', monospace; margin-bottom: 6px;">FAILED SECTIONS</div>
-                        <div id="pwFailedSections" style="font-size: 12px; color: var(--text-secondary);"></div>
-                    </div>
-
-                    <!-- Attestation Chain -->
-                    <div class="section-title" style="margin-top: 24px; display: flex; align-items: center; gap: 8px;">
-                        Attestation Chain
-                        <button class="btn btn-sm" onclick="refreshAttestations()" style="margin-left: auto;">REFRESH</button>
-                    </div>
-                    <div id="attestationChain" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
-                        <div style="font-size: 12px; color: var(--text-muted); padding: 12px;">No attestations loaded</div>
-                    </div>
-
                     <!-- Live Event Feed -->
                     <div class="section-title" style="margin-top: 24px; display: flex; align-items: center; gap: 8px;">
                         Live Events
@@ -2373,6 +2384,110 @@
                             The agent will automatically connect via WebSocket and begin streaming health events.
                         </div>
                     </div>
+
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <!-- AXIOM CONSOLE — Task submission + live event stream -->
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <div style="margin-top: 40px; border-top: 1px solid #2a2a3a; padding-top: 32px;">
+
+                        <!-- Header + daemon connection status -->
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <div style="font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 700; color: var(--lcars-gold); letter-spacing: 3px;">AXIOM CONSOLE</div>
+                            <div id="axiomConnPill" style="display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; border-radius: 100px; background: rgba(239,83,80,0.12); border: 1px solid var(--accent-danger);">
+                                <span id="axiomConnDot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-danger);"></span>
+                                <span id="axiomConnText" style="font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 600; color: var(--accent-danger);">Disconnected</span>
+                            </div>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                                <input id="axiomDaemonUrl" type="text"
+                                    value="ws://localhost:8070/ws"
+                                    placeholder="ws://host:8070/ws"
+                                    style="padding: 6px 12px; background: var(--bg-surface); border: 1px solid #333; border-radius: 6px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-size: 11px; width: 220px;"
+                                >
+                                <button onclick="axiomConnect()" style="padding: 7px 18px; border: none; border-radius: 6px; background: var(--lcars-gold); color: #000; font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: 1px;">CONNECT</button>
+                            </div>
+                        </div>
+
+                        <!-- Task submission -->
+                        <div class="section-title">Submit Task</div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+                            <textarea id="axiomTaskInput"
+                                placeholder="Describe a coding task for Axiom + Claude…"
+                                rows="3"
+                                style="flex: 1; min-width: 260px; padding: 10px 14px; background: var(--bg-surface); border: 1px solid #333; border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: vertical;"
+                            ></textarea>
+                            <div style="display: flex; flex-direction: column; gap: 8px; justify-content: flex-start;">
+                                <button onclick="axiomSubmitTask()" style="padding: 10px 22px; border: none; border-radius: 8px; background: linear-gradient(135deg, #22c997, #0d7a54); color: #fff; font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; cursor: pointer; letter-spacing: 1px; white-space: nowrap;">RUN TASK</button>
+                                <input id="axiomWorkDir" type="text" placeholder="/path/to/repo (optional)"
+                                    style="padding: 7px 10px; background: var(--bg-surface); border: 1px solid #2a2a3a; border-radius: 6px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+                            </div>
+                        </div>
+
+                        <!-- Approval widget (hidden until needed) -->
+                        <div id="axiomApprovalBox" style="display: none; margin-bottom: 16px; padding: 16px 20px; background: rgba(255,183,77,0.08); border: 2px solid var(--accent-warning); border-radius: 10px;">
+                            <div style="font-family: 'Orbitron', monospace; font-size: 12px; color: var(--accent-warning); margin-bottom: 8px; letter-spacing: 2px;">TIER-3 APPROVAL REQUIRED</div>
+                            <div id="axiomApprovalReason" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.6;"></div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="axiomApprove()" style="padding: 9px 24px; border: none; border-radius: 7px; background: linear-gradient(135deg, #22c997, #0d7a54); color: #fff; font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; cursor: pointer; letter-spacing: 1px;">APPROVE</button>
+                                <button onclick="axiomDeny()" style="padding: 9px 24px; border: none; border-radius: 7px; background: linear-gradient(135deg, #ef5350, #b71c1c); color: #fff; font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; cursor: pointer; letter-spacing: 1px;">DENY</button>
+                            </div>
+                        </div>
+
+                        <!-- Live event stream -->
+                        <div class="section-title" style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                            Live Events
+                            <span id="axiomActiveTask" style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;"></span>
+                            <button class="btn btn-sm" onclick="axiomClearFeed()" style="margin-left: auto;">CLEAR</button>
+                        </div>
+                        <div id="axiomEventFeed" class="terminal" style="height: 340px; overflow-y: auto; font-size: 12px;">
+                            <div class="terminal-line info">Connect to Axiom daemon to submit tasks…</div>
+                        </div>
+
+                        <!-- Recent task list -->
+                        <div class="section-title" style="margin-top: 20px;">Recent Tasks</div>
+                        <div id="axiomTaskList" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;">
+                            <div style="color: var(--text-muted); font-size: 12px; padding: 8px;">No tasks yet.</div>
+                        </div>
+
+                    </div><!-- /AXIOM CONSOLE -->
+
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <!-- AXIOM AUDIT LOG — Hash-chain proof of AI behavior   -->
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <div style="margin-top: 40px; border-top: 1px solid #2a2a3a; padding-top: 32px;">
+
+                        <!-- Header -->
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <div style="font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 700; color: var(--lcars-blue); letter-spacing: 3px;">AUDIT LOG</div>
+                            <div id="auditChainBadge" style="display: none; padding: 4px 14px; border-radius: 100px; font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1px;"></div>
+                            <div style="margin-left: auto; display: flex; gap: 10px;">
+                                <button onclick="auditLoad()" style="background: rgba(100,149,237,0.15); border: 1px solid var(--lcars-blue); color: var(--lcars-blue); border-radius: 6px; padding: 7px 18px; font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 600; letter-spacing: 1px; cursor: pointer;">LOAD</button>
+                                <button onclick="auditVerify()" style="background: rgba(100,181,120,0.15); border: 1px solid var(--accent-success); color: var(--accent-success); border-radius: 6px; padding: 7px 18px; font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 600; letter-spacing: 1px; cursor: pointer;">VERIFY CHAIN</button>
+                            </div>
+                        </div>
+
+                        <!-- Audit table -->
+                        <div style="overflow-x: auto; border: 1px solid #2a2a3a; border-radius: 8px;">
+                            <table id="auditTable" style="width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+                                <thead>
+                                    <tr style="background: rgba(100,149,237,0.08); color: var(--text-muted);">
+                                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #2a2a3a; white-space: nowrap;">#</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #2a2a3a; white-space: nowrap;">TIME</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #2a2a3a; white-space: nowrap;">TASK</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #2a2a3a; white-space: nowrap;">TOOL</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #2a2a3a; white-space: nowrap;">TIER</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #2a2a3a; white-space: nowrap;">SIG</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #2a2a3a;">RESULT</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditTbody">
+                                    <tr><td colspan="7" style="padding: 20px; text-align: center; color: var(--text-muted);">Press LOAD to fetch audit entries.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="auditSummary" style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted);"></div>
+
+                    </div><!-- /AXIOM AUDIT LOG -->
+
                 </div>
 
             </div>
@@ -2489,123 +2604,6 @@
                     line-height: 1.5;
                 ">
                     <div style="color: #666; text-align: center; padding: 20px;">No alerts. Everything is running smoothly! ✓</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Governance Approval Modal -->
-    <div id="governanceModal" style="
-        display: none;
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.7);
-        z-index: 10000;
-        justify-content: center;
-        align-items: center;
-    ">
-        <div style="
-            background: #0d1117;
-            border: 2px solid #ff9900;
-            border-radius: 8px;
-            max-width: 560px;
-            width: 90%;
-            padding: 0;
-            box-shadow: 0 0 40px rgba(255,153,0,0.3);
-            font-family: 'Courier New', monospace;
-        ">
-            <!-- Header -->
-            <div style="
-                background: linear-gradient(135deg, #ff9900 0%, #cc7a00 100%);
-                padding: 16px 24px;
-                border-radius: 6px 6px 0 0;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            ">
-                <span style="color: #000; font-weight: bold; font-size: 16px; letter-spacing: 1px;">
-                    GOVERNANCE APPROVAL REQUIRED
-                </span>
-                <span id="govCountdown" style="
-                    color: #000;
-                    font-weight: bold;
-                    font-size: 20px;
-                    font-variant-numeric: tabular-nums;
-                ">5:00</span>
-            </div>
-            <!-- Body -->
-            <div style="padding: 24px;">
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
-                    <tr>
-                        <td style="color: #888; padding: 6px 12px 6px 0; white-space: nowrap;">Request ID</td>
-                        <td id="govRequestId" style="color: #e0e0e0; padding: 6px 0; word-break: break-all; font-size: 12px;"></td>
-                    </tr>
-                    <tr>
-                        <td style="color: #888; padding: 6px 12px 6px 0;">Service</td>
-                        <td id="govService" style="color: #ff9900; padding: 6px 0; font-weight: bold;"></td>
-                    </tr>
-                    <tr>
-                        <td style="color: #888; padding: 6px 12px 6px 0;">Rule</td>
-                        <td id="govRule" style="color: #e0e0e0; padding: 6px 0;"></td>
-                    </tr>
-                    <tr>
-                        <td style="color: #888; padding: 6px 12px 6px 0;">Action</td>
-                        <td id="govAction" style="color: #e0e0e0; padding: 6px 0; font-size: 13px;"></td>
-                    </tr>
-                    <tr>
-                        <td style="color: #888; padding: 6px 12px 6px 0;">Tier</td>
-                        <td id="govTier" style="color: #ff9900; padding: 6px 0; font-weight: bold;"></td>
-                    </tr>
-                </table>
-                <div style="
-                    background: rgba(255,153,0,0.1);
-                    border: 1px solid rgba(255,153,0,0.3);
-                    border-radius: 4px;
-                    padding: 10px 14px;
-                    margin-bottom: 20px;
-                    color: #ffb74d;
-                    font-size: 13px;
-                ">
-                    This action requires human approval. It will auto-DENY when the timer expires.
-                </div>
-                <!-- Buttons -->
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button onclick="respondGovernance(true)" style="
-                        background: #22c997;
-                        color: #000;
-                        border: none;
-                        padding: 10px 28px;
-                        font-weight: bold;
-                        font-size: 14px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-family: 'Courier New', monospace;
-                        letter-spacing: 1px;
-                    ">APPROVE</button>
-                    <button onclick="deferGovernance()" style="
-                        background: #ffb74d;
-                        color: #000;
-                        border: none;
-                        padding: 10px 28px;
-                        font-weight: bold;
-                        font-size: 14px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-family: 'Courier New', monospace;
-                        letter-spacing: 1px;
-                    ">DEFER</button>
-                    <button onclick="respondGovernance(false)" style="
-                        background: #ef5350;
-                        color: #fff;
-                        border: none;
-                        padding: 10px 28px;
-                        font-weight: bold;
-                        font-size: 14px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-family: 'Courier New', monospace;
-                        letter-spacing: 1px;
-                    ">DENY</button>
                 </div>
             </div>
         </div>
@@ -3274,8 +3272,83 @@
         }
 
         // ===========================================
-        // AGENT PANEL FUNCTIONS
+        // AGENT WEBSOCKET & PANEL FUNCTIONS
         // ===========================================
+
+        let agentWs = null;
+        let agentReconnectTimer = null;
+
+        function connectAgentFeed() {
+            if (agentWs && agentWs.readyState <= 1) return;
+
+            const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = proto + '//' + location.host + '/agent/ws';
+
+            try {
+                agentWs = new WebSocket(wsUrl);
+            } catch (e) {
+                updateAgentConnStatus(false);
+                return;
+            }
+
+            agentWs.onopen = () => {
+                updateAgentConnStatus(true);
+                agentFeedLog('Connected to qh-agent', 'info');
+                if (agentReconnectTimer) { clearTimeout(agentReconnectTimer); agentReconnectTimer = null; }
+            };
+
+            agentWs.onclose = () => {
+                updateAgentConnStatus(false);
+                agentFeedLog('Agent disconnected', 'warning');
+                if (agentModeEnabled) {
+                    agentReconnectTimer = setTimeout(connectAgentFeed, 5000);
+                }
+            };
+
+            agentWs.onerror = () => {
+                updateAgentConnStatus(false);
+            };
+
+            agentWs.onmessage = (evt) => {
+                try {
+                    const msg = JSON.parse(evt.data);
+                    routeAgentMessage(msg);
+                } catch (e) {
+                    agentFeedLog('Unparseable: ' + evt.data, 'warning');
+                }
+            };
+        }
+
+        function routeAgentMessage(msg) {
+            const type = msg.type || msg.event_type || '';
+
+            if (type === 'health_event' || type === 'health') {
+                const svc = msg.service || msg.name || 'unknown';
+                const healthy = msg.healthy !== undefined ? msg.healthy : msg.status === 'healthy';
+                updateAgentServiceCard(svc, healthy, msg.message || '');
+                agentFeedLog(`[${svc}] ${healthy ? 'HEALTHY' : 'UNHEALTHY'} — ${msg.message || ''}`, healthy ? 'info' : 'error');
+            }
+
+            if (type === 'remediation') {
+                const svc = msg.service || 'unknown';
+                const ok = msg.success !== false;
+                agentFeedLog(`[REMEDIATION] ${svc}: ${msg.action || msg.message || ''} — ${ok ? 'OK' : 'FAILED'}`, ok ? 'info' : 'error');
+            }
+
+            if (type === 'status_update' || type === 'status') {
+                const services = msg.services || {};
+                for (const [svc, info] of Object.entries(services)) {
+                    const healthy = info.healthy !== undefined ? info.healthy : info.status === 'healthy';
+                    updateAgentServiceCard(svc, healthy, info.message || '');
+                }
+            }
+
+            if (type === 'governance_request') {
+                const badge = document.getElementById('agentNavBadge');
+                if (badge) badge.style.display = 'block';
+                agentFeedLog(`[GOVERNANCE] ${msg.action || 'Approval required'} — check governance panel`, 'warning');
+            }
+        }
 
         function updateAgentConnStatus(connected) {
             const pill = document.getElementById('agentConnPill');
@@ -3302,9 +3375,10 @@
             }
         }
 
-        function updateAgentServiceCard(service, healthy) {
+        function updateAgentServiceCard(service, healthy, message) {
             const el = document.getElementById('agentSvcStatus-' + service);
             if (!el) {
+                // Dynamically add card if service not in default grid
                 const grid = document.getElementById('agentHealthGrid');
                 if (grid) {
                     const card = document.createElement('div');
@@ -3340,78 +3414,6 @@
         function clearAgentFeed() {
             const feed = document.getElementById('agentEventFeed');
             if (feed) feed.innerHTML = '<div class="terminal-line info">Console cleared</div>';
-        }
-
-        function updatePlaywrightStats(d) {
-            const lastRun = document.getElementById('pwLastRun');
-            const passed = document.getElementById('pwPassed');
-            const failed = document.getElementById('pwFailed');
-            const sections = document.getElementById('pwSections');
-            if (lastRun) {
-                const t = d.ts ? new Date(d.ts).toLocaleString() : new Date().toLocaleString();
-                lastRun.textContent = t;
-                lastRun.style.color = 'var(--text-primary)';
-            }
-            if (passed) {
-                passed.textContent = d.total_passed;
-                passed.style.color = 'var(--accent-success)';
-            }
-            if (failed) {
-                failed.textContent = d.total_failed;
-                failed.style.color = d.total_failed === 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
-            }
-            if (sections) {
-                sections.textContent = d.sections;
-                sections.style.color = 'var(--text-primary)';
-            }
-            const failList = document.getElementById('pwFailedList');
-            const failSections = document.getElementById('pwFailedSections');
-            if (failList && failSections) {
-                if (d.failed_sections && d.failed_sections.length > 0) {
-                    failSections.textContent = d.failed_sections.join(', ');
-                    failList.style.display = 'block';
-                } else {
-                    failList.style.display = 'none';
-                }
-            }
-        }
-
-        let attestationInterval = null;
-
-        function refreshAttestations() {
-            const container = document.getElementById('attestationChain');
-            if (!container) return;
-            fetch('/agent/audit?limit=20')
-                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-                .then(entries => {
-                    if (!entries.length) {
-                        container.innerHTML = '<div style="font-size: 12px; color: var(--text-muted); padding: 12px;">No attestation entries found</div>';
-                        return;
-                    }
-                    container.innerHTML = '';
-                    entries.forEach(e => {
-                        const ok = e.action_result === 'success' || e.action_result === 'governance_approved';
-                        const color = ok ? 'var(--accent-success)' : e.action_result === 'dry_run' ? 'var(--lcars-gold)' : 'var(--accent-danger)';
-                        const sigShort = e.signature ? e.signature.substring(0, 16) + '...' : 'unsigned';
-                        const hashShort = e.hash ? e.hash.substring(0, 12) + '...' : '';
-                        const ts = new Date(e.timestamp).toLocaleString();
-                        const card = document.createElement('div');
-                        card.style.cssText = 'padding: 10px 14px; background: var(--bg-elevated); border-radius: 6px; border-left: 3px solid ' + color + '; font-size: 12px;';
-                        card.innerHTML =
-                            '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">' +
-                                '<span style="color: var(--text-primary); font-family: \'Orbitron\', monospace;">#' + e.seq + ' — ' + e.rule_name + '</span>' +
-                                '<span style="color: ' + color + ';">' + e.action_result + '</span>' +
-                            '</div>' +
-                            '<div style="color: var(--text-muted);">' + ts + '</div>' +
-                            '<div style="color: var(--text-muted); margin-top: 2px; font-family: monospace; font-size: 11px;" title="Hash: ' + (e.hash || '') + '">' +
-                                'hash: ' + hashShort + ' | sig: ' + sigShort +
-                            '</div>';
-                        container.appendChild(card);
-                    });
-                })
-                .catch(() => {
-                    container.innerHTML = '<div style="font-size: 12px; color: var(--text-muted); padding: 12px;">Agent not connected — attestations unavailable</div>';
-                });
         }
 
         // Log level: 0=errors only, 1=info, 2=verbose (shows all RPC)
@@ -3756,7 +3758,7 @@
             // Create activity line
             const line = document.createElement('div');
             line.style.cssText = `margin-bottom: 4px; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.03);`;
-            line.innerHTML = `<span style="color: #666; font-size: 10px;">[${timestamp}]</span> <span style="color: ${color};">${message}</span>`;
+            line.innerHTML = `<span style="color: #666; font-size: 10px;">[${timestamp}]</span> <span style="color: ${color};">${escapeHtml(String(message))}</span>`;
 
             if (activityPanel) {
                 activityPanel.appendChild(line);
@@ -3948,8 +3950,7 @@
                 if (!container || !peers) return;
 
                 let html = '';
-                const activePeers = peers.filter(p => p.bestNumber > 0 || p.roles !== "AUTHORITY");
-                for (const peer of activePeers) {
+                for (const peer of peers) {
                     const peerId = peer.peerId;
                     const shortId = peerId.substring(0, 16) + '...';
                     const known = KNOWN_VALIDATORS_STATUS[peerId];
@@ -4567,8 +4568,8 @@
                 if (proposals && proposals.length > 0) {
                     proposalsList.innerHTML = proposals.map(p => `
                         <div class="info-row">
-                            <span class="info-label">Proposal #${p.id}</span>
-                            <span class="info-value">${p.proposed?.substring(0, 20)}... (${p.votes_for}/${p.votes_against})</span>
+                            <span class="info-label">Proposal #${escapeHtml(String(p.id))}</span>
+                            <span class="info-value">${escapeHtml(String(p.proposed?.substring(0, 20)))}... (${escapeHtml(String(p.votes_for))}/${escapeHtml(String(p.votes_against))})</span>
                         </div>
                     `).join('');
                 } else {
@@ -5182,9 +5183,8 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    const bal = data.balance ? (BigInt(data.balance) / BigInt(10**18)).toString() + ' QMHY' : 'N/A';
-                    updateFaucetStatus(true, bal);
-                    faucetLog(`Faucet online — balance: ${bal}`, 'info');
+                    updateFaucetStatus(true, `Block: ${data.block_height || 'N/A'}`);
+                    faucetLog(`Faucet online - ${data.validators_online || 0} validators`, 'info');
                 } else {
                     updateFaucetStatus(false);
                     faucetLog(`Faucet returned error: ${response.status}`, 'error');
@@ -5284,8 +5284,8 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    faucetLog(`Drip sent! TX: ${result.hash || result.tx_hash || 'pending'}`, 'info');
-                    faucetLog(`Amount: 100 QMHY — segment: ${result.segment || 'N/A'}`, 'info');
+                    faucetLog(`Drip sent! TX: ${result.tx_hash || 'pending'}`, 'info');
+                    faucetLog(`Amount: ${result.amount || '100 QMHY'}`, 'info');
 
                     // Update rate limit and counter
                     lastDripTime[recipient] = now;
@@ -5336,9 +5336,9 @@
 
         // Dev account seeds (from validator-governance-cli.py)
         const DEV_ACCOUNTS = {
-            alice: 'REDACTED_FAUCET_SEED',
-            bob: 'REDACTED_BOB_SEED',
-            charlie: 'REDACTED_CHARLIE_SEED'
+            alice: '2eb5fca9ecb08243d333e38adbc99a786edea20f8f88c51b5703754eef4d7a66183e03c1de99dc133c29c5cde6a984f5',
+            bob: '034a9b6570680a960ff781fec37012c355cbf698e26788b6f3b351daec75beea101f9c3b8b07fefa1d84d8b48ea02f1e',
+            charlie: 'b2e5b1dd89b389f61b108bff36755bd0b5208aac741233e538a464dbd841b5bf68cc36bde662e8fde70fd41cdd605766'
         };
 
         // Pallet indices (from runtime)
@@ -5982,7 +5982,7 @@
                 const myPeerId = await rpc('system_localPeerId');
                 peerMap.delete(myPeerId);
 
-                const allPeers = Array.from(peerMap.values()).filter(p => p.bestNumber > 0 || p.roles !== "AUTHORITY");
+                const allPeers = Array.from(peerMap.values());
 
                 if (allPeers.length === 0) {
                     discoveredPeers = [];
@@ -6047,7 +6047,7 @@
                     <div class="info-row" style="padding: 8px 0; border-bottom: 1px solid var(--bg-surface); opacity: ${peer.directConnection ? '1' : '0.7'};">
                         <div style="display: flex; justify-content: space-between; width: 100%;">
                             <span style="font-size: 12px; font-family: 'Orbitron', monospace;">
-                                <span style="color: ${peer.color}; font-weight: 600;">${peer.name}</span>
+                                <span style="color: ${peer.color}; font-weight: 600;">${escapeHtml(String(peer.name))}</span>
                                 ${!peer.directConnection ? '<span style="color: var(--text-muted); font-size: 9px; margin-left: 4px;">(via network)</span>' : ''}
                             </span>
                             <span style="color: ${peer.role === 'Validator' ? 'var(--accent-success)' : 'var(--text-muted)'}; font-size: 10px; font-weight: ${peer.role === 'Validator' ? 'bold' : 'normal'};">
@@ -6055,14 +6055,14 @@
                             </span>
                         </div>
                         <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                            📍 ${peer.location} • Block #${peer.bestBlock.toLocaleString()}
+                            📍 ${escapeHtml(String(peer.location))} • Block #${peer.bestBlock.toLocaleString()}
                         </div>
                     </div>
                 `).join('');
 
             } catch (e) {
                 discoveredPeers = [];
-                container.innerHTML = `<div class="info-row"><span class="info-label" style="color: var(--accent-danger);">Error: ${e.message}</span></div>`;
+                container.innerHTML = `<div class="info-row"><span class="info-label" style="color: var(--accent-danger);">Error: ${escapeHtml(String(e.message))}</span></div>`;
             }
         }
 
@@ -6208,6 +6208,10 @@
             // Check faucet service status
             checkFaucetService();
 
+            // Initialize agent panel UI and connect if previously enabled
+            updateAgentModeUI();
+            if (agentModeEnabled) connectAgentFeed();
+
             // Check quantum status
             updateQuantumStatus();
 
@@ -6229,167 +6233,7 @@
             // Refresh on-chain forum messages every 30 seconds
             setInterval(loadChainForumMessages, 30000);
 
-            // Initialize agent panel UI and connect if previously enabled
-            updateAgentModeUI();
-            if (agentModeEnabled) connectAgentFeed();
-
             log('Dashboard initialized - all panels active', 'info');
-        }
-
-        // ==========================================
-        // GOVERNANCE APPROVAL MODAL
-        // ==========================================
-
-        // Global reference to the agent WebSocket (for sending governance responses)
-        window.agentWs = null;
-        // Current governance request state
-        window._govRequestId = null;
-        window._govTimer = null;
-
-        function showGovernanceModal(data) {
-            window._govRequestId = data.request_id;
-            document.getElementById('govRequestId').textContent = data.request_id;
-            document.getElementById('govService').textContent = data.service;
-            document.getElementById('govRule').textContent = data.rule;
-            document.getElementById('govAction').textContent = data.action;
-            document.getElementById('govTier').textContent = data.tier;
-
-            const modal = document.getElementById('governanceModal');
-            modal.style.display = 'flex';
-
-            // Start countdown
-            let remaining = data.timeout_secs || 300;
-            const countdownEl = document.getElementById('govCountdown');
-
-            function updateCountdown() {
-                const mins = Math.floor(remaining / 60);
-                const secs = remaining % 60;
-                countdownEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-                if (remaining <= 60) {
-                    countdownEl.style.color = '#ef5350';
-                } else {
-                    countdownEl.style.color = '#000';
-                }
-                if (remaining <= 0) {
-                    // Auto-DENY on timeout
-                    respondGovernance(false);
-                    return;
-                }
-                remaining--;
-                window._govTimer = setTimeout(updateCountdown, 1000);
-            }
-            updateCountdown();
-        }
-
-        function respondGovernance(approved) {
-            if (window._govTimer) {
-                clearTimeout(window._govTimer);
-                window._govTimer = null;
-            }
-            if (window._govRequestId && window.agentWs && window.agentWs.readyState === WebSocket.OPEN) {
-                window.agentWs.send(JSON.stringify({
-                    type: 'governance_response',
-                    request_id: window._govRequestId,
-                    approved: approved
-                }));
-                const action = approved ? 'APPROVED' : 'DENIED';
-                log(`[Governance] ${action} request ${window._govRequestId.slice(0, 8)}...`, approved ? 'success' : 'error');
-            }
-            window._govRequestId = null;
-            document.getElementById('governanceModal').style.display = 'none';
-        }
-
-        function deferGovernance() {
-            // Hide modal without responding — timer continues server-side, auto-DENY on expiry
-            if (window._govTimer) {
-                clearTimeout(window._govTimer);
-                window._govTimer = null;
-            }
-            document.getElementById('governanceModal').style.display = 'none';
-            log(`[Governance] Deferred request ${(window._govRequestId || '').slice(0, 8)}... — will auto-DENY on server timeout`, 'warning');
-            window._govRequestId = null;
-        }
-
-        // Agent WebSocket feed — streams live health events and remediations
-        // Connects via /agent/ws (nginx-proxied to agent:8090)
-        let agentWs = null;
-        let agentReconnectTimer = null;
-
-        function connectAgentFeed() {
-            if (agentWs && agentWs.readyState <= 1) return;
-
-            const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = proto + '//' + location.host + '/agent/ws';
-
-            try {
-                agentWs = new WebSocket(wsUrl);
-            } catch (e) {
-                updateAgentConnStatus(false);
-                return;
-            }
-
-            agentWs.onopen = () => {
-                updateAgentConnStatus(true);
-                agentFeedLog('Connected to qh-agent', 'info');
-                log('[Agent] Connected to agent feed', 'success');
-                if (agentReconnectTimer) { clearTimeout(agentReconnectTimer); agentReconnectTimer = null; }
-                refreshAttestations();
-                if (attestationInterval) clearInterval(attestationInterval);
-                attestationInterval = setInterval(refreshAttestations, 60000);
-            };
-
-            agentWs.onmessage = (e) => {
-                try {
-                    const d = JSON.parse(e.data);
-
-                    if (d.type === 'health_event') {
-                        const isUnhealthy = d.kind === 'ServiceUnhealthy' || d.kind === 'NetworkAliasMissing';
-                        const isRecovered = d.kind === 'ServiceRecovered';
-                        const healthy = isRecovered || (!isUnhealthy && d.kind !== 'ServiceDown');
-                        const type = isUnhealthy ? 'error' : isRecovered ? 'success' : 'info';
-                        const svc = d.service || 'unknown';
-                        updateAgentServiceCard(svc, healthy);
-                        agentFeedLog(`[${svc}] ${d.kind} — ${d.detail || ''}`, type);
-                        log(`[Agent] ${svc}: ${d.kind} — ${d.detail}`, type);
-                    } else if (d.type === 'remediation') {
-                        const ok = d.result === 'success' || d.result === 'governance_approved';
-                        const type = ok ? 'success' : 'error';
-                        agentFeedLog(`[REMEDIATION] ${d.service}: ${d.rule} — ${d.result}`, type);
-                        log(`[Agent] ${d.rule} on ${d.service}: ${d.result}`, type);
-                    } else if (d.type === 'status_update') {
-                        const services = d.services || [];
-                        services.forEach(s => {
-                            updateAgentServiceCard(s.name, s.state === 'healthy' || s.state === 'running');
-                        });
-                        const summary = services.map(s => `${s.name}:${s.state}`).join(' ');
-                        log(`[Agent] Status: ${summary}`, 'info');
-                    } else if (d.type === 'governance_request') {
-                        const badge = document.getElementById('agentNavBadge');
-                        if (badge) badge.style.display = 'block';
-                        agentFeedLog(`[GOVERNANCE] ${d.rule} on ${d.service} — approval required`, 'warning');
-                        showGovernanceModal(d);
-                        log(`[Governance] Approval required: ${d.rule} on ${d.service}`, 'warning');
-                    } else if (d.type === 'playwright_report') {
-                        updatePlaywrightStats(d);
-                        const status = d.total_failed === 0 ? 'success' : 'error';
-                        const failInfo = d.failed_sections && d.failed_sections.length ? ` — Failed: ${d.failed_sections.join(', ')}` : '';
-                        agentFeedLog(`[PLAYWRIGHT] ${d.total_passed}/${d.total_passed + d.total_failed} passed (${d.sections} sections)${failInfo}`, status);
-                        log(`[Agent] Playwright: ${d.total_passed}/${d.total_passed + d.total_failed} passed`, status);
-                    }
-                } catch (err) {
-                    console.warn('[AgentFeed] Parse error:', err);
-                }
-            };
-
-            agentWs.onerror = () => {
-                updateAgentConnStatus(false);
-            };
-
-            agentWs.onclose = () => {
-                updateAgentConnStatus(false);
-                agentFeedLog('Agent disconnected', 'warning');
-                agentReconnectTimer = setTimeout(connectAgentFeed, 5000);
-            };
         }
 
         // Single function to fetch all node data
@@ -7255,23 +7099,41 @@
         // Auto-refresh signals panel every 30 seconds
         setInterval(() => {
             if (document.getElementById('panel-signals')?.classList.contains('active')) {
-                refreshTaoSignals();
+                refreshAgentSignals();
                 updateReporterStatus();
                 fetchOraclePrices();
             }
         }, 30000);
 
-        // Initialize signals panel when shown
+        // Initialize panels when shown
         const originalShowPanel = showPanel;
+        let extrinsicsPanelInitialized = false;
+        let identityPanelShown = false;
         showPanel = function(name) {
             originalShowPanel(name);
             if (name === 'signals') {
-                refreshTaoSignals();
+                refreshAgentSignals();
                 updateReporterStatus();
                 fetchOraclePrices();
             }
             if (name === 'messages') {
                 checkMessagingStatus();
+            }
+            if (name === 'identity') {
+                if (!identityPanelShown) {
+                    initIdentityPanel();
+                    identityPanelShown = true;
+                } else {
+                    refreshIdentityStats();
+                }
+            }
+            if (name === 'extrinsics') {
+                if (!extrinsicsPanelInitialized) {
+                    initExtrinsicsPanel();
+                    extrinsicsPanelInitialized = true;
+                } else {
+                    refreshExtrinsicsStats();
+                }
             }
         };
 
@@ -7831,8 +7693,8 @@
             }
 
             try {
-                // Post to local node via nginx proxy
-                const validatorRpc = window.location.origin + '/rpc';
+                // Post to Alice validator via nginx proxy (avoids browser CORS issues)
+                const validatorRpc = window.location.origin + '/rpc/alice';
                 const forumParams = { content: content };
                 const res = await fetch(validatorRpc, {
                     method: 'POST',
@@ -7924,14 +7786,14 @@
         // SIGNALS TAB FUNCTIONS
         // ==========================================
 
-        async function refreshTaoSignals() {
+        async function refreshAgentSignals() {
             try {
                 const response = await fetch('http://209.38.225.4/api/subnets');
                 if (response.ok) {
                     const subnets = await response.json();
-                    document.getElementById('taoApiStatus').textContent = 'LIVE';
-                    document.getElementById('taoApiStatus').style.color = 'var(--accent-success)';
-                    document.getElementById('taoSubnetCount').textContent = subnets.length;
+                    document.getElementById('agentApiStatus').textContent = 'LIVE';
+                    document.getElementById('agentApiStatus').style.color = 'var(--accent-success)';
+                    document.getElementById('agentSourceCount').textContent = subnets.length;
 
                     // Update top subnets
                     const topSubnets = subnets
@@ -7943,15 +7805,15 @@
                     topSubnets.forEach(s => {
                         const emissionPct = (s.emission * 100).toFixed(1);
                         html += `<div class="stat-card" style="padding: 8px;">
-                            <div class="stat-label" style="font-size: 9px;">SN${s.netuid} ${s.name.split(' ')[0]}</div>
+                            <div class="stat-label" style="font-size: 9px;">SN${escapeHtml(String(s.netuid))} ${escapeHtml(String(s.name.split(' ')[0]))}</div>
                             <div class="stat-value" style="font-size: 14px; color: var(--accent-success);">${emissionPct}%</div>
                         </div>`;
                     });
-                    document.getElementById('taoSubnetList').innerHTML = html;
+                    document.getElementById('agentSourceList').innerHTML = html;
                 }
             } catch (e) {
-                document.getElementById('taoApiStatus').textContent = 'OFFLINE';
-                document.getElementById('taoApiStatus').style.color = 'var(--accent-danger)';
+                document.getElementById('agentApiStatus').textContent = 'OFFLINE';
+                document.getElementById('agentApiStatus').style.color = 'var(--accent-danger)';
             }
         }
 
@@ -7968,16 +7830,98 @@
             // Activate tab
             const tab = document.getElementById('tab-' + tabName);
             if (tab) tab.classList.add('active');
+
+            // Tab-specific actions
+            if (tabName === 'qrng') {
+                refreshKirqSources();
+            } else if (tabName === 'oracle') {
+                refreshOracleData();
+            }
         }
 
-        // QRNG Functions
-        function generateNewQrng() {
-            log('Generating new QRNG entropy...', 'info');
-            // TODO: Connect to threshold_qrng endpoint
-            const mockEntropy = '0x' + Array.from({length: 8}, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('') + '...';
-            document.getElementById('qrngCombined').textContent = mockEntropy;
-            document.getElementById('qrngLastUpdate').textContent = 'Just now';
-            log('New entropy generated: ' + mockEntropy, 'success');
+        // QRNG Functions - Connected to Kirq Hub
+        const KIRQ_HUB_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:8001'
+            : `http://${window.location.hostname}:8001`;
+
+        async function generateNewQrng() {
+            log('Fetching entropy from Kirq Hub...', 'info');
+            try {
+                const response = await fetch(`${KIRQ_HUB_URL}/api/entropy/mixed`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        num_bytes: 32,
+                        sources: ['crypto4a', 'quantum_vault'],
+                        proof_required: true
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                const entropyHex = '0x' + data.entropy.slice(0, 16) + '...' + data.entropy.slice(-8);
+                document.getElementById('qrngCombined').textContent = entropyHex;
+                document.getElementById('qrngLastUpdate').textContent = 'Just now';
+                document.getElementById('qrngLocalStatus').textContent = 'ACTIVE';
+                document.getElementById('qrngLocalStatus').style.color = 'var(--accent-success)';
+
+                if (data.proof) {
+                    document.getElementById('qrngProofStatus').textContent = 'Valid STARK';
+                    document.getElementById('qrngProofStatus').style.color = 'var(--accent-success)';
+                }
+
+                log('Entropy fetched: ' + entropyHex, 'success');
+
+                // Also push to priority queue
+                await pushEntropyToQueue(data.entropy);
+
+            } catch (err) {
+                log('Failed to fetch entropy: ' + err.message, 'error');
+                document.getElementById('qrngLocalStatus').textContent = 'OFFLINE';
+                document.getElementById('qrngLocalStatus').style.color = 'var(--accent-danger)';
+            }
+        }
+
+        async function pushEntropyToQueue(entropy) {
+            try {
+                // Push to local priority queue via node RPC
+                await rpcCall('priority_submitEvent', [{
+                    id: Date.now(),
+                    data: JSON.stringify({ type: 'qrng_entropy', entropy: entropy }),
+                    timestamp: Date.now(),
+                    block_height: currentBlockNumber || 0
+                }, 75]); // Priority 75 = High
+                log('Entropy pushed to priority queue', 'info');
+            } catch (err) {
+                // Priority queue RPC may not be available, that's ok
+                console.log('Priority queue push skipped:', err.message);
+            }
+        }
+
+        async function refreshKirqSources() {
+            try {
+                const response = await fetch(`${KIRQ_HUB_URL}/api/sources`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const sources = await response.json();
+
+                let html = '';
+                for (const [name, status] of Object.entries(sources)) {
+                    const color = status.healthy ? 'var(--accent-success)' : 'var(--accent-danger)';
+                    const statusText = status.healthy ? `${status.bytes_available || 32} bytes` : 'Offline';
+                    html += `<div class="info-row">
+                        <span class="info-label">${escapeHtml(String(name))}</span>
+                        <span class="info-value" style="color: ${color};">${escapeHtml(String(statusText))}</span>
+                    </div>`;
+                }
+                document.getElementById('qrngSharesList').innerHTML = html || '<div class="info-row"><span class="info-label">No sources</span></div>';
+
+                const activeCount = Object.values(sources).filter(s => s.healthy).length;
+                document.getElementById('qrngSharesReceived').textContent = `${activeCount}/${Object.keys(sources).length}`;
+
+            } catch (err) {
+                console.log('Failed to refresh Kirq sources:', err.message);
+            }
         }
 
         function exportQrng() {
@@ -7989,11 +7933,14 @@
             });
         }
 
-        function configureQrng() {
-            const threshold = prompt('Enter threshold (e.g., "2-of-3"):', '2-of-3');
-            if (threshold) {
-                document.getElementById('qrngThreshold').textContent = threshold;
-                log('QRNG threshold updated to ' + threshold, 'info');
+        async function configureQrng() {
+            // Show Kirq Hub health and configuration
+            try {
+                const response = await fetch(`${KIRQ_HUB_URL}/api/health`);
+                const health = await response.json();
+                alert(`Kirq Hub Status:\n\nStatus: ${health.status}\nSources: ${JSON.stringify(health.sources || {}, null, 2)}\n\nEndpoint: ${KIRQ_HUB_URL}`);
+            } catch (err) {
+                alert(`Kirq Hub Status: OFFLINE\n\nEndpoint: ${KIRQ_HUB_URL}\nError: ${err.message}`);
             }
         }
 
@@ -8064,6 +8011,279 @@
             }, 500);
         }
 
+        // ==================== REPORTER APPROVAL FUNCTIONS ====================
+
+        async function refreshOracleData() {
+            try {
+                // Fetch available signals from other nodes
+                await refreshAvailableSignals();
+                // Fetch pending reporter proposals
+                await refreshReporterProposals();
+                // Fetch approved reporters
+                await refreshApprovedReporters();
+            } catch (err) {
+                console.log('Failed to refresh oracle data:', err.message);
+            }
+        }
+
+        async function refreshReporterProposals() {
+            try {
+                // Get all proposals from chain via RPC
+                const proposals = await rpcCall('oracle_getPendingProposals', []);
+                const container = document.getElementById('reporterProposalsList');
+                if (!container) return;
+
+                if (!proposals || proposals.length === 0) {
+                    container.innerHTML = '<div style="color: var(--text-muted); text-align: center;">No pending proposals</div>';
+                    return;
+                }
+
+                let html = '';
+                for (const p of proposals) {
+                    html += `
+                        <div style="background: rgba(255,153,0,0.1); padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid var(--lcars-gold);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="color: var(--lcars-gold);">Proposal #${p.id}</strong>
+                                <span style="font-size: 10px;">Votes: ${p.yes_votes} yes / ${p.no_votes} no</span>
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-muted); margin: 4px 0;">
+                                Candidate: ${p.candidate.slice(0, 12)}...
+                            </div>
+                            <div style="font-size: 10px;">Stake: ${p.stake} | Feeds: ${p.supported_feeds.join(', ')}</div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <button class="btn btn-success" style="padding: 4px 12px; font-size: 10px;" onclick="voteOnReporter(${p.id}, true)">APPROVE</button>
+                                <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 10px;" onclick="voteOnReporter(${p.id}, false)">REJECT</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
+            } catch (err) {
+                console.log('Failed to fetch proposals:', err.message);
+            }
+        }
+
+        async function refreshApprovedReporters() {
+            try {
+                const reporters = await rpcCall('oracle_getAllReporters', []);
+                const container = document.getElementById('approvedReportersList');
+                if (!container) return;
+
+                if (!reporters || reporters.length === 0) {
+                    container.innerHTML = '<div style="color: var(--text-muted); text-align: center;">No approved reporters</div>';
+                    return;
+                }
+
+                let html = '';
+                for (const r of reporters) {
+                    const statusColor = r.status === 'Active' ? 'var(--accent-success)' : 'var(--text-muted)';
+                    html += `
+                        <div class="info-row">
+                            <span class="info-label">${r.account.slice(0, 12)}...</span>
+                            <span class="info-value" style="color: ${statusColor};">Rep: ${r.reputation} | Priority: ${r.priority}</span>
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
+            } catch (err) {
+                console.log('Failed to fetch reporters:', err.message);
+            }
+        }
+
+        async function proposeReporter() {
+            const candidate = prompt('Enter candidate account address:');
+            if (!candidate) return;
+
+            const stake = prompt('Enter stake amount (QMHY):', '1000');
+            if (!stake) return;
+
+            const feeds = prompt('Enter supported feeds (0=CadUsd, 1=QmhyUsd, 2=QmhyCad), comma-separated:', '0,1');
+            if (!feeds) return;
+
+            const feedsArray = feeds.split(',').map(f => parseInt(f.trim()));
+
+            log('Submitting reporter proposal...', 'info');
+            try {
+                // This would need to be an extrinsic call via extension
+                // For now, show how it would work
+                await rpcCall('oracle_proposeReporter', [candidate, parseInt(stake) * 1e12, feedsArray]);
+                log('Reporter proposal submitted!', 'success');
+                refreshReporterProposals();
+            } catch (err) {
+                log('Failed to submit proposal: ' + err.message, 'error');
+            }
+        }
+
+        async function voteOnReporter(proposalId, approve) {
+            log(`Voting ${approve ? 'APPROVE' : 'REJECT'} on proposal #${proposalId}...`, 'info');
+            try {
+                await rpcCall('oracle_voteOnReporter', [proposalId, approve]);
+                log(`Vote submitted!`, 'success');
+                refreshReporterProposals();
+            } catch (err) {
+                log('Failed to vote: ' + err.message, 'error');
+            }
+        }
+
+        async function finalizeProposal(proposalId) {
+            log(`Finalizing proposal #${proposalId}...`, 'info');
+            try {
+                await rpcCall('oracle_finalizeReporterProposal', [proposalId]);
+                log('Proposal finalized!', 'success');
+                refreshReporterProposals();
+                refreshApprovedReporters();
+            } catch (err) {
+                log('Failed to finalize: ' + err.message, 'error');
+            }
+        }
+
+        // ==================== SIGNAL SUBSCRIPTION FUNCTIONS ====================
+
+        async function refreshAvailableSignals() {
+            try {
+                const signals = await rpcCall('oracle_getAvailableSignals', [null, 20]);
+                const container = document.getElementById('availableSignalsList');
+                if (!container) return;
+
+                if (!signals || signals.length === 0) {
+                    container.innerHTML = '<div style="color: var(--text-muted); text-align: center;">No available signals</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                for (const s of signals) {
+                    const typeColor = s.signal_type === 'qrng' ? 'var(--accent-info)' :
+                                     s.signal_type === 'price' ? 'var(--lcars-gold)' : 'var(--text-muted)';
+                    const acceptedIcon = s.accepted ? ' \u2713' : '';
+
+                    const card = document.createElement('div');
+                    card.style.cssText = `background: rgba(0,100,200,0.05); padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid ${typeColor};`;
+
+                    const header = document.createElement('div');
+                    header.style.cssText = 'display: flex; justify-content: space-between; align-items: center;';
+                    const strong = document.createElement('strong');
+                    strong.style.color = typeColor;
+                    strong.textContent = s.signal_type.toUpperCase() + acceptedIcon;
+                    const timeSpan = document.createElement('span');
+                    timeSpan.style.cssText = 'font-size: 10px; color: var(--text-muted);';
+                    timeSpan.textContent = new Date(s.timestamp).toLocaleTimeString();
+                    header.appendChild(strong);
+                    header.appendChild(timeSpan);
+
+                    const fromDiv = document.createElement('div');
+                    fromDiv.style.cssText = 'font-size: 10px; color: var(--text-muted); margin: 4px 0;';
+                    fromDiv.textContent = `From: ${s.source_reporter.slice(0, 12)}... @ ${s.source_node.slice(0, 8)}`;
+
+                    const previewDiv = document.createElement('div');
+                    previewDiv.style.cssText = 'font-size: 10px; font-family: "JetBrains Mono", monospace; color: var(--text-secondary);';
+                    previewDiv.textContent = s.data_preview + (s.data_preview.length >= 64 ? '...' : '');
+
+                    card.appendChild(header);
+                    card.appendChild(fromDiv);
+                    card.appendChild(previewDiv);
+
+                    if (!s.accepted) {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-success';
+                        btn.style.cssText = 'margin-top: 8px; padding: 4px 12px; font-size: 10px;';
+                        btn.textContent = 'SUBSCRIBE';
+                        btn.addEventListener('click', () => subscribeToSignal(s.signal_id));
+                        card.appendChild(btn);
+                    } else {
+                        const sub = document.createElement('span');
+                        sub.style.cssText = 'font-size: 10px; color: var(--accent-success);';
+                        sub.textContent = 'Subscribed';
+                        card.appendChild(sub);
+                    }
+
+                    container.appendChild(card);
+                }
+            } catch (err) {
+                console.log('Failed to fetch available signals:', err.message);
+            }
+        }
+
+        async function subscribeToSignal(signalId) {
+            log(`Subscribing to signal ${signalId}...`, 'info');
+            try {
+                await rpcCall('oracle_subscribeToSignal', [signalId]);
+                log('Subscribed to signal! Data pushed to priority queue.', 'success');
+                refreshAvailableSignals();
+            } catch (err) {
+                log('Failed to subscribe: ' + err.message, 'error');
+            }
+        }
+
+        async function acceptExternalSignal() {
+            const sourceReporter = prompt('Enter source reporter ID:');
+            if (!sourceReporter) return;
+
+            const signalType = prompt('Enter signal type (qrng, price, custom):', 'qrng');
+            if (!signalType) return;
+
+            const data = prompt('Enter signal data (hex):');
+            if (!data) return;
+
+            const signal = {
+                signal_id: 'sig_' + Date.now(),
+                signal_type: signalType,
+                data: data,
+                source_node: 'external',
+                source_reporter: sourceReporter,
+                timestamp: Date.now(),
+                signature: ''  // Would need actual signature in production
+            };
+
+            log('Accepting external signal...', 'info');
+            try {
+                await rpcCall('oracle_acceptExternalSignal', [signal]);
+                log('External signal accepted!', 'success');
+                refreshAvailableSignals();
+            } catch (err) {
+                log('Failed to accept signal: ' + err.message, 'error');
+            }
+        }
+
+        async function fetchQrngFromNode() {
+            log('Fetching QRNG entropy from node via Kirq Hub...', 'info');
+            try {
+                const result = await rpcCall('qrng_fetchFromKirqHub', [32]);
+                log(`QRNG entropy fetched: 0x${result.entropy_hex.slice(0, 16)}...`, 'success');
+
+                // Also display in QRNG tab
+                document.getElementById('qrngCombined').textContent =
+                    '0x' + result.entropy_hex.slice(0, 16) + '...' + result.entropy_hex.slice(-8);
+                document.getElementById('qrngLastUpdate').textContent = 'Just now';
+
+                // Optionally push to queue
+                const push = confirm('Push entropy to priority queue?');
+                if (push) {
+                    await rpcCall('qrng_pushToQueue', [{
+                        signal_type: 'QrngEntropy',
+                        data: result.entropy_hex,
+                        source: 'kirq-hub',
+                        timestamp: Date.now()
+                    }, 75]);
+                    log('Entropy pushed to priority queue', 'success');
+                }
+            } catch (err) {
+                log('Failed to fetch QRNG: ' + err.message, 'error');
+            }
+        }
+
+        async function listMySubscriptions() {
+            try {
+                const subs = await rpcCall('oracle_listSubscriptions', []);
+                if (subs.length === 0) {
+                    alert('No active subscriptions');
+                } else {
+                    alert('Active subscriptions:\n' + subs.join('\n'));
+                }
+            } catch (err) {
+                log('Failed to list subscriptions: ' + err.message, 'error');
+            }
+        }
+
         // Auto-refresh chat every 5 seconds
         setInterval(() => {
             if (chatInitialized) {
@@ -8073,6 +8293,346 @@
 
         // Try to initialize chat on page load
         setTimeout(initChatMessaging, 2000);
+
+        // ===========================================
+        // AXIOM CONSOLE
+        // ===========================================
+
+        let axiomWs = null;
+        let axiomReconnectTimer = null;
+        let axiomPendingTaskId = null;   // task waiting on approval
+        let axiomPendingReqId  = null;   // request_id from approval_required event
+        const axiomSeenLlmText = new Set(); // task IDs that received llm_text over WS
+
+        // --- connection ---
+
+        function axiomConnect() {
+            if (axiomWs && axiomWs.readyState <= 1) axiomWs.close();
+            const url = document.getElementById('axiomDaemonUrl').value.trim() || 'ws://localhost:8070/ws';
+            try {
+                axiomWs = new WebSocket(url);
+            } catch (e) {
+                axiomSetConn(false);
+                return;
+            }
+            axiomWs.onopen  = () => { axiomSetConn(true);  axiomLog('Connected to Axiom daemon', 'info'); };
+            axiomWs.onclose = () => { axiomSetConn(false); axiomLog('Disconnected', 'warning'); };
+            axiomWs.onerror = () => { axiomSetConn(false); };
+            axiomWs.onmessage = (evt) => {
+                try { axiomHandleEvent(JSON.parse(evt.data)); }
+                catch (e) { axiomLog('Bad JSON: ' + evt.data, 'warning'); }
+            };
+        }
+
+        function axiomSetConn(ok) {
+            const dot  = document.getElementById('axiomConnDot');
+            const text = document.getElementById('axiomConnText');
+            const pill = document.getElementById('axiomConnPill');
+            if (!dot) return;
+            if (ok) {
+                dot.style.background  = 'var(--accent-success)';
+                text.style.color      = 'var(--accent-success)';
+                text.textContent      = 'Connected';
+                pill.style.background = 'rgba(34,201,151,0.12)';
+                pill.style.borderColor= 'var(--accent-success)';
+            } else {
+                dot.style.background  = 'var(--accent-danger)';
+                text.style.color      = 'var(--accent-danger)';
+                text.textContent      = 'Disconnected';
+                pill.style.background = 'rgba(239,83,80,0.12)';
+                pill.style.borderColor= 'var(--accent-danger)';
+            }
+        }
+
+        // --- task submission ---
+
+        async function axiomSubmitTask() {
+            const desc = document.getElementById('axiomTaskInput').value.trim();
+            if (!desc) { axiomLog('Enter a task description first.', 'warning'); return; }
+
+            // Ensure WS is connected so we don't miss streamed events
+            if (!axiomWs || axiomWs.readyState > 1) {
+                axiomLog('Auto-connecting to daemon…', 'info');
+                axiomConnect();
+                // Give the connection a moment to open before submitting
+                await new Promise(r => setTimeout(r, 400));
+            }
+
+            // Derive HTTP base from WS url
+            const wsUrl  = document.getElementById('axiomDaemonUrl').value.trim() || 'ws://localhost:8070/ws';
+            const httpBase = wsUrl.replace(/^ws:\/\//, 'http://').replace(/^wss:\/\//, 'https://').replace(/\/ws$/, '');
+            const workDir = document.getElementById('axiomWorkDir').value.trim() || undefined;
+
+            axiomLog(`Submitting task: "${desc.slice(0, 80)}${desc.length > 80 ? '…' : ''}"`, 'info');
+
+            const body = { description: desc };
+            if (workDir) body.working_dir = workDir;
+
+            try {
+                const resp = await fetch(httpBase + '/task/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+                if (!resp.ok) { const t = await resp.text(); axiomLog('Error: ' + t, 'error'); return; }
+                const data = await resp.json();
+                axiomLog(`Task queued: ${data.task_id}`, 'info');
+                document.getElementById('axiomActiveTask').textContent = '▶ ' + data.task_id.slice(0, 8) + '…';
+                document.getElementById('axiomTaskInput').value = '';
+                axiomAddTaskCard(data.task_id, desc.slice(0, 60), 'queued', httpBase);
+            } catch (e) {
+                axiomLog('Failed to submit: ' + e.message, 'error');
+            }
+        }
+
+        // --- event routing ---
+
+        function axiomHandleEvent(msg) {
+            const type = msg.type || '';
+            switch (type) {
+                case 'task_started':
+                    axiomLog(`▶ Task started [${msg.task_id.slice(0,8)}] — ${msg.description}`, 'info');
+                    break;
+                case 'step_executed':
+                    axiomLog(`  [${msg.trust_tier === 3 ? '⚠ T3' : 'T' + msg.trust_tier}] ${msg.tool_name} — ${(msg.result_preview || '').slice(0, 100)}`, 'info');
+                    break;
+                case 'llm_text':
+                    axiomLog(`  💬 ${msg.text.slice(0, 300)}`, 'info');
+                    axiomSeenLlmText.add(msg.task_id);
+                    break;
+                case 'task_completed':
+                    axiomLog(`✅ Task completed [${msg.task_id.slice(0,8)}] — ${msg.steps} steps, ${(msg.files_changed || []).length} file(s) changed`, 'info');
+                    document.getElementById('axiomActiveTask').textContent = '';
+                    axiomUpdateTaskCard(msg.task_id, 'completed');
+                    // If no llm_text was streamed live, fetch the result from REST
+                    if (!axiomSeenLlmText.has(msg.task_id)) {
+                        axiomFetchAndShowResult(msg.task_id);
+                    }
+                    axiomSeenLlmText.delete(msg.task_id);
+                    break;
+                case 'task_failed':
+                    axiomLog(`❌ Task failed [${msg.task_id.slice(0,8)}]: ${msg.error}`, 'error');
+                    document.getElementById('axiomActiveTask').textContent = '';
+                    axiomUpdateTaskCard(msg.task_id, 'failed');
+                    break;
+                case 'approval_required':
+                    axiomPendingTaskId = msg.task_id;
+                    axiomPendingReqId  = msg.request_id;
+                    axiomLog(`⚠ Approval required [${msg.task_id.slice(0,8)}]: ${msg.reason}`, 'warning');
+                    const box = document.getElementById('axiomApprovalBox');
+                    document.getElementById('axiomApprovalReason').textContent = msg.reason;
+                    box.style.display = 'block';
+                    // Flash the AGENT nav tab
+                    const badge = document.getElementById('agentNavBadge');
+                    if (badge) badge.style.display = 'block';
+                    break;
+                default:
+                    axiomLog(JSON.stringify(msg).slice(0, 160), 'info');
+            }
+        }
+
+        // --- result fetch (fallback when WS was not connected during task) ---
+
+        async function axiomFetchAndShowResult(taskId) {
+            const wsUrl    = document.getElementById('axiomDaemonUrl').value.trim() || 'ws://localhost:8070/ws';
+            const httpBase = wsUrl.replace(/^ws:\/\//, 'http://').replace(/^wss:\/\//, 'https://').replace(/\/ws$/, '');
+            try {
+                const resp = await fetch(httpBase + '/task/' + taskId);
+                if (!resp.ok) return;
+                const data = await resp.json();
+                if (data.result) {
+                    axiomLog(`  💬 ${data.result.slice(0, 600)}`, 'info');
+                }
+            } catch (_) {}
+        }
+
+        // --- approval ---
+
+        async function axiomApprove() { await axiomSendDecision(true);  }
+        async function axiomDeny()    { await axiomSendDecision(false); }
+
+        async function axiomSendDecision(approved) {
+            if (!axiomPendingTaskId) return;
+            const wsUrl    = document.getElementById('axiomDaemonUrl').value.trim() || 'ws://localhost:8070/ws';
+            const httpBase = wsUrl.replace(/^ws:\/\//, 'http://').replace(/^wss:\/\//, 'https://').replace(/\/ws$/, '');
+            const endpoint = `${httpBase}/task/${axiomPendingTaskId}/${approved ? 'approve' : 'deny'}`;
+            try {
+                await fetch(endpoint, { method: 'POST' });
+                axiomLog(approved ? '✅ Approved.' : '🚫 Denied.', approved ? 'info' : 'warning');
+            } catch (e) {
+                axiomLog('Decision failed: ' + e.message, 'error');
+            }
+            document.getElementById('axiomApprovalBox').style.display = 'none';
+            const badge = document.getElementById('agentNavBadge');
+            if (badge) badge.style.display = 'none';
+            axiomPendingTaskId = null;
+            axiomPendingReqId  = null;
+        }
+
+        // --- task list cards ---
+
+        function axiomAddTaskCard(id, desc, status, httpBase) {
+            const list = document.getElementById('axiomTaskList');
+            // remove empty placeholder
+            list.querySelectorAll('[data-empty]').forEach(el => el.remove());
+            const card = document.createElement('div');
+            card.id = 'axiomCard-' + id;
+            card.style.cssText = 'display:flex; align-items:center; gap:10px; padding:8px 14px; background:var(--bg-elevated); border-radius:7px; border-left:3px solid var(--lcars-gold);';
+            card.innerHTML = `
+                <span id="axiomCardStatus-${id}" style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(248,161,0,0.15); color:var(--lcars-gold); font-family:'Orbitron',monospace; white-space:nowrap;">${status.toUpperCase()}</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); white-space:nowrap;">${id.slice(0,8)}</span>
+                <span style="flex:1; font-size:12px; color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${desc}</span>
+                <button onclick="axiomPollTask('${id}','${httpBase}')" style="padding:3px 10px; border:1px solid #333; border-radius:4px; background:transparent; color:var(--text-muted); font-size:10px; cursor:pointer;">REFRESH</button>
+            `;
+            list.prepend(card);
+        }
+
+        function axiomUpdateTaskCard(id, status) {
+            const el = document.getElementById('axiomCardStatus-' + id);
+            if (!el) return;
+            const colors = { completed: 'var(--accent-success)', failed: 'var(--accent-danger)', running: 'var(--lcars-blue-light)', queued: 'var(--lcars-gold)' };
+            el.textContent = status.toUpperCase();
+            el.style.color = colors[status] || 'var(--text-muted)';
+            el.style.background = 'transparent';
+        }
+
+        async function axiomPollTask(id, httpBase) {
+            try {
+                const resp = await fetch(httpBase + '/task/' + id);
+                const data = await resp.json();
+                axiomUpdateTaskCard(id, data.status);
+                axiomLog(`Task ${id.slice(0,8)}: ${data.status}${data.error ? ' — ' + data.error : ''}${data.steps ? ' (' + data.steps + ' steps)' : ''}`, 'info');
+            } catch (e) {
+                axiomLog('Poll failed: ' + e.message, 'error');
+            }
+        }
+
+        // --- feed helpers ---
+
+        function axiomLog(msg, level) {
+            const feed = document.getElementById('axiomEventFeed');
+            if (!feed) return;
+            const line = document.createElement('div');
+            line.className = 'terminal-line ' + (level || 'info');
+            const ts = new Date().toLocaleTimeString('en-CA', { hour12: false });
+            line.textContent = `[${ts}] ${msg}`;
+            feed.appendChild(line);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function axiomClearFeed() {
+            const feed = document.getElementById('axiomEventFeed');
+            if (feed) feed.innerHTML = '';
+        }
+
+        // ===========================================
+        // AXIOM AUDIT LOG
+        // ===========================================
+
+        function auditDaemonUrl() {
+            const inp = document.getElementById('axiomDaemonUrl');
+            return inp ? inp.value.replace(/^ws/, 'http') : 'http://localhost:8070';
+        }
+
+        async function auditLoad() {
+            const base = auditDaemonUrl();
+            try {
+                const r = await fetch(`${base}/audit`);
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                const entries = await r.json();
+                auditRender(entries);
+            } catch (e) {
+                document.getElementById('auditSummary').textContent = 'Error: ' + e.message;
+            }
+        }
+
+        async function auditVerify() {
+            const base = auditDaemonUrl();
+            const badge = document.getElementById('auditChainBadge');
+            const summary = document.getElementById('auditSummary');
+            badge.style.display = 'none';
+            try {
+                const r = await fetch(`${base}/audit/verify`);
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                const data = await r.json();
+
+                badge.style.display = 'inline-block';
+                if (data.valid) {
+                    badge.textContent = `CHAIN VALID  ✓  ${data.entries} entries`;
+                    badge.style.background = 'rgba(100,181,120,0.15)';
+                    badge.style.border = '1px solid var(--accent-success)';
+                    badge.style.color = 'var(--accent-success)';
+                } else {
+                    badge.textContent = 'CHAIN INTEGRITY FAILURE ✗';
+                    badge.style.background = 'rgba(239,83,80,0.15)';
+                    badge.style.border = '1px solid var(--accent-danger)';
+                    badge.style.color = 'var(--accent-danger)';
+                }
+                summary.textContent = `Verified ${data.entries} entries — chain is ${data.valid ? 'intact' : 'CORRUPTED'}`;
+
+                // Also reload the table
+                await auditLoad();
+            } catch (e) {
+                summary.textContent = 'Verify error: ' + e.message;
+            }
+        }
+
+        const TIER_LABELS = { 0: 'observe', 1: 'low', 2: 'ops', 3: 'gov' };
+        const TIER_COLORS = {
+            0: 'var(--text-muted)',
+            1: 'var(--lcars-blue)',
+            2: 'var(--lcars-gold)',
+            3: 'var(--accent-danger)',
+        };
+
+        function auditRender(entries) {
+            const tbody = document.getElementById('auditTbody');
+            if (!entries || entries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: var(--text-muted);">No audit entries yet.</td></tr>';
+                document.getElementById('auditSummary').textContent = '0 entries';
+                return;
+            }
+
+            tbody.innerHTML = entries.map(e => {
+                const tier = e.trust_tier;
+                const tierLabel = TIER_LABELS[tier] || tier;
+                const tierColor = TIER_COLORS[tier] || 'var(--text-secondary)';
+
+                // Signature type — detect Falcon vs plain tier tag
+                let sigLabel = 'none';
+                let sigColor = 'var(--text-muted)';
+                if (e.signature && e.signature.startsWith('falcon512:')) {
+                    sigLabel = 'Falcon-512';
+                    sigColor = 'var(--lcars-blue)';
+                } else if (e.signature && e.signature.startsWith('tier:')) {
+                    sigLabel = e.signature.replace('tier:', '');
+                    sigColor = 'var(--text-muted)';
+                } else if (e.signature && e.signature.length > 0 && e.signature !== 'none') {
+                    sigLabel = e.signature.substring(0, 16) + '…';
+                    sigColor = 'var(--accent-success)';
+                }
+
+                // Shorten task_id
+                const tid = e.task_id.length > 12 ? e.task_id.substring(0, 8) + '…' : e.task_id;
+                // Result preview
+                const res = e.result_summary.length > 48 ? e.result_summary.substring(0, 48) + '…' : e.result_summary;
+                // Time
+                const ts = new Date(e.timestamp).toLocaleTimeString('en-CA', { hour12: false });
+
+                return `<tr style="border-bottom: 1px solid #1e1e2e;">
+                    <td style="padding: 7px 12px; color: var(--text-muted);">${e.seq}</td>
+                    <td style="padding: 7px 12px; color: var(--text-secondary); white-space: nowrap;">${ts}</td>
+                    <td style="padding: 7px 12px; color: var(--text-muted); font-size: 10px; max-width: 80px; overflow: hidden; text-overflow: ellipsis;">${tid}</td>
+                    <td style="padding: 7px 12px; color: var(--lcars-gold);">${e.tool_name}</td>
+                    <td style="padding: 7px 12px; color: ${tierColor}; font-weight: 700;">${tierLabel}</td>
+                    <td style="padding: 7px 12px; color: ${sigColor}; font-size: 10px;">${sigLabel}</td>
+                    <td style="padding: 7px 12px; color: var(--text-secondary); font-size: 11px;">${res}</td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('auditSummary').textContent = `${entries.length} entries loaded`;
+        }
+
     </script>
 </body>
 </html>
