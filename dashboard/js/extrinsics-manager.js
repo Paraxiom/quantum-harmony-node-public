@@ -89,48 +89,57 @@ class ExtrinsicsManager {
 
             // --- Transparence Integration ---
             {
-                name: 'TransparenceOracle', index: 30, category: 'Transparence Integration',
-                description: 'Transparence data oracle for external data feeds',
+                name: 'TransparenceOracle', index: 33, category: 'Transparence Integration',
+                description: 'Oracle validation anchoring — 6 CI/CD plugin types',
                 calls: [
-                    { name: 'submit_data', index: 0, params: [{ name: 'feed_id', type: 'Bytes', desc: 'Feed identifier (32 bytes)' }, { name: 'value', type: 'Bytes', desc: 'Data payload' }, { name: 'timestamp', type: 'u64', desc: 'Observation timestamp' }] },
-                    { name: 'register_feed', index: 1, params: [{ name: 'feed_id', type: 'Bytes', desc: 'Feed identifier' }, { name: 'description', type: 'Bytes', desc: 'Feed description' }] },
-                    { name: 'update_feed_config', index: 2, params: [{ name: 'feed_id', type: 'Bytes', desc: 'Feed identifier' }, { name: 'min_reporters', type: 'u32', desc: 'Minimum reporters required' }] },
+                    { name: 'submit_validation', index: 0, params: [{ name: 'contract_id', type: 'u64', desc: 'Contract ID' }, { name: 'milestone_id', type: 'u64', desc: 'Milestone ID' }, { name: 'plugin', type: 'u8', desc: '0=Endpoint,1=Coverage,2=CodeAnalysis,3=Deploy,4=Visual,5=Performance' }, { name: 'evidence_hash', type: 'H256', desc: 'SHA-256 of evidence' }, { name: 'verdict', type: 'u8', desc: '0=Pending,1=Pass,2=Fail,3=Error' }, { name: 'score', type: 'u8', desc: 'Quality score 0-100' }, { name: 'ci_commit_hash', type: 'Bytes', desc: 'Git commit SHA (40 chars)' }, { name: 'metadata', type: 'Bytes', desc: 'JSON metadata' }] },
+                    { name: 'revoke_validation', index: 1, params: [{ name: 'validation_id', type: 'u64', desc: 'Validation ID to revoke' }] },
                 ],
-                storage: ['Feeds', 'DataPoints', 'Reporters']
+                storage: ['Validations', 'NextValidationId', 'ValidationsByContract', 'ValidationsByMilestone', 'ValidationsInBlock', 'MilestoneStatus']
             },
             {
-                name: 'TransparenceTwoManRule', index: 31, category: 'Transparence Integration',
-                description: 'Dual-approval for sensitive operations',
+                name: 'TransparenceTwoManRule', index: 34, category: 'Transparence Integration',
+                description: 'Two-Man Rule — Fragment A (human) + Fragment B (machine) for payment',
                 calls: [
-                    { name: 'propose_action', index: 0, params: [{ name: 'action_type', type: 'Bytes', desc: 'Action type identifier' }, { name: 'payload', type: 'Bytes', desc: 'Action payload' }] },
-                    { name: 'approve_action', index: 1, params: [{ name: 'action_id', type: 'u32', desc: 'Action ID to approve' }] },
-                    { name: 'reject_action', index: 2, params: [{ name: 'action_id', type: 'u32', desc: 'Action ID to reject' }] },
-                    { name: 'execute_action', index: 3, params: [{ name: 'action_id', type: 'u32', desc: 'Action ID to execute' }] },
+                    { name: 'initiate_ceremony', index: 0, params: [{ name: 'contract_id', type: 'u64', desc: 'Contract ID' }, { name: 'milestone_id', type: 'u64', desc: 'Milestone ID' }, { name: 'amount_hash', type: 'H256', desc: 'Hash of payment amount' }, { name: 'evidence_hash', type: 'H256', desc: 'Hash of oracle evidence' }] },
+                    { name: 'sign_human', index: 1, params: [{ name: 'ceremony_id', type: 'u64', desc: 'Ceremony ID — Fragment A' }] },
+                    { name: 'sign_machine', index: 2, params: [{ name: 'ceremony_id', type: 'u64', desc: 'Ceremony ID — Fragment B (oracle only)' }] },
+                    { name: 'reject_machine', index: 3, params: [{ name: 'ceremony_id', type: 'u64', desc: 'Ceremony ID — oracle rejects (tests failed)' }] },
+                    { name: 'register_oracle', index: 4, params: [{ name: 'oracle_account', type: 'AccountId', desc: 'Account to whitelist as oracle' }] },
+                    { name: 'remove_oracle', index: 5, params: [{ name: 'oracle_account', type: 'AccountId', desc: 'Account to remove from oracle whitelist' }] },
                 ],
-                storage: ['PendingActions', 'ActionHistory', 'ApprovalStatus']
+                storage: ['Ceremonies', 'NextCeremonyId', 'CeremoniesByContract', 'AuthorizedOracles']
             },
             {
-                name: 'TransparenceDeliverables', index: 32, category: 'Transparence Integration',
-                description: 'Deliverable tracking with milestone verification',
+                name: 'TransparenceDeliverables', index: 35, category: 'Transparence Integration',
+                description: 'Contract lifecycle — Draft → Active → InExecution → Completed',
                 calls: [
-                    { name: 'create_deliverable', index: 0, params: [{ name: 'project_id', type: 'Bytes', desc: 'Project identifier' }, { name: 'title', type: 'Bytes', desc: 'Deliverable title' }, { name: 'description', type: 'Bytes', desc: 'Deliverable description' }, { name: 'due_block', type: 'u32', desc: 'Due block number' }] },
-                    { name: 'submit_proof', index: 1, params: [{ name: 'deliverable_id', type: 'u32', desc: 'Deliverable ID' }, { name: 'proof_hash', type: 'H256', desc: 'Hash of proof document' }] },
-                    { name: 'verify_deliverable', index: 2, params: [{ name: 'deliverable_id', type: 'u32', desc: 'Deliverable ID' }, { name: 'approved', type: 'bool', desc: 'Approval status' }] },
+                    { name: 'create_contract', index: 0, params: [{ name: 'title_hash', type: 'H256', desc: 'SHA-256 of contract title' }, { name: 'devis_hash', type: 'H256', desc: 'SHA-256 of devis technique' }, { name: 'supplier', type: 'AccountId', desc: 'Supplier account' }] },
+                    { name: 'activate_contract', index: 1, params: [{ name: 'contract_id', type: 'u64', desc: 'Contract ID' }] },
+                    { name: 'add_milestone', index: 2, params: [{ name: 'contract_id', type: 'u64', desc: 'Contract ID' }, { name: 'sequence', type: 'u32', desc: 'Milestone sequence number' }, { name: 'description_hash', type: 'H256', desc: 'SHA-256 of milestone description' }] },
+                    { name: 'submit_deliverable', index: 3, params: [{ name: 'contract_id', type: 'u64', desc: 'Contract ID' }, { name: 'milestone_id', type: 'u64', desc: 'Milestone ID' }, { name: 'evidence_hash', type: 'H256', desc: 'SHA-256 of deliverable evidence' }] },
+                    { name: 'record_validation_result', index: 4, params: [{ name: 'milestone_id', type: 'u64', desc: 'Milestone ID' }, { name: 'passed', type: 'bool', desc: 'Validation passed?' }] },
+                    { name: 'record_payment_authorized', index: 5, params: [{ name: 'milestone_id', type: 'u64', desc: 'Milestone ID' }, { name: 'ceremony_id', type: 'u64', desc: 'Two-Man Rule ceremony ID' }] },
+                    { name: 'terminate_contract', index: 6, params: [{ name: 'contract_id', type: 'u64', desc: 'Contract ID' }] },
                 ],
-                storage: ['Deliverables', 'ProofSubmissions', 'ProjectDeliverables']
+                storage: ['Contracts', 'NextContractId', 'Milestones', 'NextMilestoneId', 'MilestonesByContract', 'ContractsByOwner', 'ContractsBySupplier']
             },
 
             // --- Identity ---
             {
-                name: 'IdentityRegistry', index: 33, category: 'Identity',
-                description: 'Post-quantum identity registration with SPHINCS+ keys',
+                name: 'IdentityRegistry', index: 36, category: 'Identity',
+                description: 'PQ soulbound NFT identities — register, reputation, key rotation',
                 calls: [
-                    { name: 'register_identity', index: 0, params: [{ name: 'identity_type', type: 'u8', desc: '0=Human, 1=Shield, 2=Agent, 3=Validator, 4=Oracle' }, { name: 'display_name', type: 'Bytes', desc: 'Display name' }, { name: 'sphincs_public_key', type: 'Bytes', desc: 'SPHINCS+ public key (32 bytes)' }] },
-                    { name: 'update_identity', index: 1, params: [{ name: 'display_name', type: 'Bytes', desc: 'New display name' }, { name: 'metadata', type: 'Bytes', desc: 'JSON metadata' }] },
-                    { name: 'attest_identity', index: 2, params: [{ name: 'target', type: 'AccountId', desc: 'Account to attest' }, { name: 'attestation', type: 'Bytes', desc: 'Attestation data' }] },
-                    { name: 'revoke_identity', index: 3, params: [{ name: 'target', type: 'AccountId', desc: 'Account to revoke' }] },
+                    { name: 'register_identity', index: 0, params: [{ name: 'role', type: 'u8', desc: '0=Shield,1=Agent,2=OracleReporter,3=Validator,4=Citizen,5=Decideur,6=Fournisseur,7=Service' }, { name: 'algorithm', type: 'u8', desc: '0=Falcon512,1=Falcon1024,2=SphincsPlus,3=MlKem1024' }, { name: 'public_key_hash', type: 'H256', desc: 'SHA-256 of public key' }, { name: 'fingerprint', type: 'Bytes', desc: 'Key fingerprint (e.g. 58:72:ac:47...)' }, { name: 'label', type: 'Bytes', desc: 'Label (e.g. shield-alice-main)' }, { name: 'metadata', type: 'Bytes', desc: 'JSON metadata' }, { name: 'hardware_tier', type: 'u8', desc: '0=Unknown,1=Edge,2=Municipal,3=Enterprise,4=Defence,5=Cloud' }] },
+                    { name: 'update_metadata', index: 1, params: [{ name: 'identity_id', type: 'u64', desc: 'Identity ID' }, { name: 'new_metadata', type: 'Bytes', desc: 'New JSON metadata' }] },
+                    { name: 'record_activity', index: 2, params: [{ name: 'identity_id', type: 'u64', desc: 'Identity ID' }] },
+                    { name: 'update_reputation', index: 3, params: [{ name: 'identity_id', type: 'u64', desc: 'Identity ID' }, { name: 'delta', type: 'u32', desc: 'Reputation change (signed)' }] },
+                    { name: 'suspend_identity', index: 4, params: [{ name: 'identity_id', type: 'u64', desc: 'Identity ID' }] },
+                    { name: 'reactivate_identity', index: 5, params: [{ name: 'identity_id', type: 'u64', desc: 'Identity ID' }] },
+                    { name: 'revoke_identity', index: 6, params: [{ name: 'identity_id', type: 'u64', desc: 'Identity ID (permanent)' }] },
+                    { name: 'rotate_key', index: 7, params: [{ name: 'identity_id', type: 'u64', desc: 'Identity ID' }, { name: 'new_public_key_hash', type: 'H256', desc: 'New SHA-256 of public key' }, { name: 'new_fingerprint', type: 'Bytes', desc: 'New key fingerprint' }] },
                 ],
-                storage: ['Identities', 'Attestations', 'IdentityCount']
+                storage: ['Identities', 'NextIdentityId', 'IdentityByFingerprint', 'IdentityByPublicKeyHash', 'IdentitiesByOwner', 'IdentitiesByRole']
             },
 
             // --- Governance ---

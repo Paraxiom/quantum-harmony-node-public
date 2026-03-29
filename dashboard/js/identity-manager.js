@@ -1,6 +1,6 @@
 /**
  * QuantumHarmony Identity Manager
- * Manages PQ soulbound NFT identities via pallet-identity-registry (index 33)
+ * Manages PQ soulbound NFT identities via pallet-identity-registry (index 36)
  * Provides registration, browsing, reputation leaderboard, and identity actions.
  */
 
@@ -95,7 +95,7 @@ class IdentityManager {
     async fetchIdentityCount() {
         try {
             // Query IdentityRegistry.IdentityCount storage
-            // Module prefix: IdentityRegistry (index 33)
+            // Module prefix: IdentityRegistry (index 36)
             // Storage: IdentityCount — a simple u32 value
             const result = await this.rpc('state_getStorage', [
                 this.storageKey('IdentityRegistry', 'IdentityCount')
@@ -213,11 +213,11 @@ class IdentityManager {
     }
 
     buildRegisterCallData(role, algorithm, hardwareTier, label, pubkeyHash, fingerprint, metadata) {
-        // IdentityRegistry pallet index 33, register_identity call index 0
+        // IdentityRegistry pallet index 36, register_identity call index 0
         // Params: identity_type(u8), display_name(Bytes), sphincs_public_key(Bytes)
         // Extended params encoded as JSON metadata
         let data = '';
-        data += (33).toString(16).padStart(2, '0'); // pallet index
+        data += (36).toString(16).padStart(2, '0'); // pallet index
         data += (0).toString(16).padStart(2, '0');  // call index
         data += this.encodeU8(role);
         data += this.encodeBytes(label);
@@ -230,9 +230,9 @@ class IdentityManager {
     }
 
     buildUpdateMetadataCallData(displayName, metadata) {
-        // IdentityRegistry pallet index 33, update_identity call index 1
+        // IdentityRegistry pallet index 36, update_identity call index 1
         let data = '';
-        data += (33).toString(16).padStart(2, '0');
+        data += (36).toString(16).padStart(2, '0');
         data += (1).toString(16).padStart(2, '0');
         data += this.encodeBytes(displayName);
         data += this.encodeBytes(metadata);
@@ -240,9 +240,9 @@ class IdentityManager {
     }
 
     buildRevokeCallData(targetAccountId) {
-        // IdentityRegistry pallet index 33, revoke_identity call index 3
+        // IdentityRegistry pallet index 36, revoke_identity call index 3
         let data = '';
-        data += (33).toString(16).padStart(2, '0');
+        data += (36).toString(16).padStart(2, '0');
         data += (3).toString(16).padStart(2, '0');
         data += this.encodeAccountId(targetAccountId);
         return '0x' + data;
@@ -565,7 +565,7 @@ function refreshIdentityBrowser() {
             <div style="font-family: 'Orbitron', monospace; font-size: 14px; color: var(--accent-danger); margin-bottom: 8px;">QUERY FAILED</div>
             <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">${escapeHtmlId(e.message)}</div>
             <div style="font-size: 11px; color: var(--text-muted);">
-                Ensure your node is connected and the IdentityRegistry pallet (index 33) is available.
+                Ensure your node is connected and the IdentityRegistry pallet (index 36) is available.
             </div>
         </div>`;
         renderLeaderboard([]);
