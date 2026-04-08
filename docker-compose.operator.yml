@@ -5,7 +5,7 @@
 
 services:
   node:
-    image: sylvaincormier/quantumharmony-node:v28.2-pqc-keepalive
+    image: sylvaincormier/quantumharmony-node:latest
     platform: linux/amd64
     container_name: quantumharmony-node
     restart: unless-stopped
@@ -32,8 +32,8 @@ services:
       - "--prometheus-external"
       - "--database=paritydb"
       - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/QmNVxWSGHMvTeLTHxZfd8WcWDSiEnQBVyZboaVqPc4y3ox"
-      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/QmeZwWcveZ5faSHYpJkiuCwx4wy7ByUUvn3rJhhQETWbYC"
-      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/QmU2nT5Mg3m8Mn5mHa3GeJ5erUWeVookcbNJWc46AeRd4k"
+      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/QmYH2jNRsGMCtTESfXHTQw7cZFSeqcf2m3Zrq2PMLNpEYz"
+      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/QmQcCuinHi6x69Nb6GtXQCVbsJs54YEX586GjurPjkA83Q"
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:9944/health"]
       interval: 30s
@@ -59,7 +59,7 @@ services:
     restart: unless-stopped
     environment:
       - IMAGE=sylvaincormier/quantumharmony-node
-      - IMAGE_TAG=v28.2-pqc-keepalive
+      - IMAGE_TAG=latest
       - UPDATE_INTERVAL=86400
       - MONITOR_INTERVAL=60
       - HEALTH_TIMEOUT=180
