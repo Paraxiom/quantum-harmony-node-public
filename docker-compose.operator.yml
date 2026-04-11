@@ -17,6 +17,16 @@ services:
     volumes:
       - node-data:/data
       - ./configs/chain-spec.json:/config/chainspec.json:ro
+    environment:
+      # Disable the PQC libp2p transport (Kyber-1024 + Falcon-1024) and fall
+      # back to classical Noise (Ed25519). The PQC transport in the Paraxiom
+      # polkadot-sdk fork has a known handshake integration bug that causes
+      # peers to drop immediately after the handshake completes, which in
+      # turn triggers cascade failures in txpool-background and
+      # basic-block-import-worker essential tasks. Until that bug is fixed
+      # in source, every validator MUST set this env var to stay on-chain.
+      # See: docs/ops/incident-2026-04-11-pqc-transport-recovery.md
+      DISABLE_PQC_TRANSPORT: "1"
     entrypoint: ["/usr/local/bin/quantumharmony-node"]
     command:
       - "--chain=/config/chainspec.json"
@@ -31,9 +41,12 @@ services:
       - "--prometheus-port=9615"
       - "--prometheus-external"
       - "--database=paritydb"
-      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/QmNVxWSGHMvTeLTHxZfd8WcWDSiEnQBVyZboaVqPc4y3ox"
-      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/QmYH2jNRsGMCtTESfXHTQw7cZFSeqcf2m3Zrq2PMLNpEYz"
-      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/QmQcCuinHi6x69Nb6GtXQCVbsJs54YEX586GjurPjkA83Q"
+      # Bootnodes use classical-Noise (Ed25519) peer IDs produced by the
+      # fallback transport (not the Qm... SPHINCS+/PQC IDs). These must be
+      # refreshed any time a validator's network/secret_ed25519 is rotated.
+      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWFcndVYEyhSkLWgYagBqyuNfEX1pSKCKGW6snjCgesqKQ"
+      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe"
+      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2"
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:9944/health"]
       interval: 30s
