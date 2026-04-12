@@ -3938,9 +3938,9 @@
 
         // Known validator mapping (legacy - for status tab)
         const KNOWN_VALIDATORS_STATUS = {
-            '12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp': { name: 'Alice', ip: '51.79.26.123' },
-            '12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD': { name: 'Bob', ip: '51.79.26.168' },
-            '12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x': { name: 'Charlie', ip: '209.38.225.4' },
+            '12D3KooWFcndVYEyhSkLWgYagBqyuNfEX1pSKCKGW6snjCgesqKQ': { name: 'Alice', ip: '51.79.26.123' },
+            '12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe': { name: 'Bob', ip: '51.79.26.168' },
+            '12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2': { name: 'Charlie', ip: '209.38.225.4' },
         };
 
         async function updatePeersList() {
@@ -5675,9 +5675,9 @@
 
         // Known validator data (bootstrap nodes + approved validators)
         const KNOWN_VALIDATORS = {
-            '12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp': { name: 'Alice', ip: '51.79.26.123', location: 'Montreal, Canada', provider: 'OVH', color: '#ff9966', tier: 1 },
-            '12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD': { name: 'Bob', ip: '51.79.26.168', location: 'Beauharnois, Canada', provider: 'OVH', color: '#66ccff', tier: 1 },
-            '12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x': { name: 'Charlie', ip: '209.38.225.4', location: 'Frankfurt, Germany', provider: 'DigitalOcean', color: '#99ff99', tier: 1 },
+            '12D3KooWFcndVYEyhSkLWgYagBqyuNfEX1pSKCKGW6snjCgesqKQ': { name: 'Alice', ip: '51.79.26.123', location: 'Montreal, Canada', provider: 'OVH', color: '#ff9966', tier: 1 },
+            '12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe': { name: 'Bob', ip: '51.79.26.168', location: 'Beauharnois, Canada', provider: 'OVH', color: '#66ccff', tier: 1 },
+            '12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2': { name: 'Charlie', ip: '209.38.225.4', location: 'Frankfurt, Germany', provider: 'DigitalOcean', color: '#99ff99', tier: 1 },
             '12D3KooWAZF2rTG2mVUBkaUAhdJ71EDgMDvCU1VZiPTpJVj7cVi1': { name: 'Edwin', ip: null, location: 'Africa', provider: 'Community', color: '#ff66cc', tier: 2 }
         };
 
@@ -6327,11 +6327,44 @@
                 const block = await rpc('chain_getBlock', [hash]);
                 const extCount = block?.block?.extrinsics?.length || 0;
 
-                // Try to identify block author from Aura
+                // Identify block author from Aura pre-digest slot
                 let authorLabel = '';
-                const authorIndex = blockNum % 2; // Aura round-robin with 2 authorities
                 const authorColors = ['#ff9966', '#66ccff', '#99ff99'];
-                const authorName = ['Alice', 'Bob', 'Charlie'][authorIndex] || '?';
+                const authorNames = ['Alice', 'Bob', 'Charlie'];
+                let authorName = '?';
+                let authorIndex = 0;
+                // Parse Aura pre-digest from block header to get slot
+                const digests = block?.block?.header?.digest?.logs || [];
+                for (const log of digests) {
+                    if (log && log.startsWith('0x06') && log.length >= 22) {
+                        // PreRuntime (0x06) + aura engine (61757261) + compact length + slot (u64 LE)
+                        const raw = log.slice(2); // remove 0x
+                        if (raw.slice(2, 10) === '61757261') { // 'aura' in hex
+                            // Decode compact length then u64 LE slot
+                            const dataHex = raw.slice(10);
+                            const firstByte = parseInt(dataHex.slice(0, 2), 16);
+                            let slotHex;
+                            if ((firstByte & 0x03) === 0) {
+                                slotHex = dataHex.slice(2, 2 + (firstByte >> 2) * 2);
+                            } else if ((firstByte & 0x03) === 1) {
+                                const len = ((firstByte | (parseInt(dataHex.slice(2, 4), 16) << 8)) >> 2);
+                                slotHex = dataHex.slice(4, 4 + len * 2);
+                            } else {
+                                slotHex = dataHex.slice(2, 18); // fallback: 8 bytes
+                            }
+                            // Parse LE u64
+                            if (slotHex && slotHex.length >= 16) {
+                                const bytes = [];
+                                for (let j = 0; j < 16; j += 2) bytes.push(parseInt(slotHex.slice(j, j+2), 16));
+                                let slot = 0n;
+                                for (let j = 7; j >= 0; j--) slot = (slot << 8n) | BigInt(bytes[j]);
+                                authorIndex = Number(slot % 3n);
+                                authorName = authorNames[authorIndex] || '?';
+                            }
+                            break;
+                        }
+                    }
+                }
                 authorLabel = `<span style="color:${authorColors[authorIndex]};font-size:10px;margin-left:8px;">by ${authorName}</span>`;
 
                 html += `<div class="info-row" style="padding:8px 0;border-bottom:1px solid var(--bg-surface);">
