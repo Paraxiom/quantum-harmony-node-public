@@ -11,6 +11,8 @@
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 SNAPSHOT_URL="https://paraxiom.org/snapshots/chaindata-latest.tar.gz"
+CHAINSPEC_URL="https://paraxiom.org/chainspec.json"
+EXPECTED_CHAINSPEC_SHA256="dc35f7582f88e320528516167ed26989fa5611a99495be2432d5370003defee6"
 COMPOSE_FILE="docker-compose.operator.yml"
 VOLUME_NAME="quantum-harmony-node_node-data"
 
@@ -26,6 +28,29 @@ bootstrap() {
 
     # Stop any running node
     docker-compose -f "$COMPOSE_FILE" down 2>/dev/null
+
+    # Refresh chainspec from canonical source. The chainspec embedded in the
+    # repo (configs/chain-spec.json) may be stale if the operator's local clone
+    # is behind. The version at https://paraxiom.org/chainspec.json is always
+    # the genesis the live network is actually running on.
+    echo "Refreshing chainspec from $CHAINSPEC_URL ..."
+    if curl -sfL -o configs/chain-spec.json.new "$CHAINSPEC_URL"; then
+        ACTUAL_SHA=$(sha256sum configs/chain-spec.json.new | awk '{print $1}')
+        if [ "$ACTUAL_SHA" = "$EXPECTED_CHAINSPEC_SHA256" ]; then
+            mv configs/chain-spec.json.new configs/chain-spec.json
+            echo "  ✓ chainspec sha256 matches expected ($EXPECTED_CHAINSPEC_SHA256)"
+        else
+            echo "  ⚠  chainspec sha256 MISMATCH:"
+            echo "       expected: $EXPECTED_CHAINSPEC_SHA256"
+            echo "       got:      $ACTUAL_SHA"
+            echo "  Update start.sh's EXPECTED_CHAINSPEC_SHA256 if this is a"
+            echo "  legitimate chainspec rev, or check for a download issue."
+            rm -f configs/chain-spec.json.new
+        fi
+    else
+        echo "  ⚠  could not fetch chainspec from $CHAINSPEC_URL"
+        echo "  Falling back to whatever is in configs/chain-spec.json"
+    fi
 
     # Remove old data
     echo "Removing old chain data..."
