@@ -27,9 +27,16 @@ services:
       # in source, every validator MUST set this env var to stay on-chain.
       # See: docs/ops/incident-2026-04-11-pqc-transport-recovery.md
       DISABLE_PQC_TRANSPORT: "1"
+      # Disable the Quantum P2P key-exchange notification protocol. The
+      # custom protocol's substream closes after its 3-message handshake,
+      # which substrate's sync engine interprets as a "disconnected with
+      # inflight" error and bans the peer to i32::MIN. Until keepalives
+      # are added in source, every validator MUST set this env var.
+      DISABLE_QUANTUM_P2P: "1"
     entrypoint: ["/usr/local/bin/quantumharmony-node"]
     command:
       - "--chain=/config/chainspec.json"
+      - "--validator"
       - "--sync=full"
       - "--base-path=/data"
       - "--name=${NODE_NAME:-Operator}"
