@@ -3168,12 +3168,24 @@
             }
         }
 
-        // Generate a new account (keypair) for receiving tokens
+        // Generate a new account (keypair) for receiving tokens.
+        //
+        // Calls the node's pqc_generateTestKeypair RPC, which was fixed
+        // on 2026-04-13 to return real SPHINCS+-SHAKE-256f-simple keys.
+        // Uses the dashboard's /rpc proxy (which goes to whichever node
+        // the dashboard is configured to talk to) instead of the old
+        // hardcoded http://localhost:9944 — that path assumed the browser
+        // host and the node were the same machine, which is false for
+        // anyone running the dashboard against a remote validator.
+        //
+        // Defensive: after receiving the keypair we sanity-check that the
+        // last 64 bytes of the secret equal the public key (standard
+        // SPHINCS+ layout). If not, we refuse to save it — protects
+        // against the pre-fix broken-keypair bug returning.
         async function generateAccount() {
             try {
-                const rpcUrl = 'http://localhost:9944';
+                const rpcUrl = (typeof config !== 'undefined' && config.rpc) ? config.rpc : '/rpc';
 
-                // Use node's pqc_generateTestKeypair to get a properly formatted SPHINCS+ keypair
                 const res = await fetch(rpcUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -3186,25 +3198,45 @@
                 });
                 const data = await res.json();
 
+                if (data.error) {
+                    throw new Error('Node RPC error: ' + (data.error.message || JSON.stringify(data.error)));
+                }
                 if (!data.result || !data.result.secret_key || !data.result.public_key) {
-                    throw new Error('Failed to generate keypair from node');
+                    throw new Error('Failed to generate keypair from node — empty result');
                 }
 
-                const secretKey = data.result.secret_key.replace(/^0x/, '');
-                const publicKey = data.result.public_key;
+                const secretKeyHex = data.result.secret_key.replace(/^0x/, '');
+                const publicKeyHex = data.result.public_key.replace(/^0x/, '');
+
+                // Structural sanity checks
+                if (secretKeyHex.length !== 256) {
+                    throw new Error('Received secret key has wrong length (' + secretKeyHex.length + ' hex chars, expected 256 = 128 bytes)');
+                }
+                if (publicKeyHex.length !== 128) {
+                    throw new Error('Received public key has wrong length (' + publicKeyHex.length + ' hex chars, expected 128 = 64 bytes)');
+                }
+                // SPHINCS+ secret layout: [SK.seed (32) || SK.prf (32) || PK.seed (32) || PK.root (32)]
+                // The last 64 bytes of the secret MUST equal the public key.
+                // If not, the node is returning a broken keypair and we refuse to use it.
+                const secretTrailing = secretKeyHex.slice(128);  // last 64 bytes in hex = last 128 hex chars
+                if (secretTrailing !== publicKeyHex) {
+                    throw new Error('Received keypair is structurally broken: last 64 bytes of secret do not match public key. ' +
+                                    'The node\'s pqc_generateTestKeypair RPC is returning a fake/mock keypair. ' +
+                                    'Upgrade the node to v43-real-keygen or newer.');
+                }
 
                 // Derive SS58 address from public key
-                const derivedAddress = publicKeyToSS58(publicKey, 42);
+                const derivedAddress = publicKeyToSS58(publicKeyHex, 42);
                 console.log('Generated SPHINCS+ keypair');
-                console.log('Public key:', publicKey.substring(0, 40) + '...');
+                console.log('Public key:', publicKeyHex.substring(0, 40) + '...');
                 console.log('SS58 address:', derivedAddress);
 
                 // Save to unified key management
-                saveActiveKey(secretKey, derivedAddress);
+                saveActiveKey(secretKeyHex, derivedAddress);
 
                 // Update the transfer secret key field
                 const keyEl = document.getElementById('transferSecretKey');
-                if (keyEl) keyEl.value = secretKey;
+                if (keyEl) keyEl.value = secretKeyHex;
 
                 setMyAccount(derivedAddress);
                 const faucetEl = document.getElementById('faucetRecipient');
@@ -3215,10 +3247,10 @@
                       'Your key is saved. Click REQUEST 100 QMHY to fund it.');
 
                 log('New SPHINCS+ account created', 'info');
-                return secretKey;
+                return secretKeyHex;
             } catch (e) {
                 console.error('generateAccount error:', e);
-                alert('Failed to generate account: ' + e.message + '\n\nMake sure local node is running.');
+                alert('Failed to generate account: ' + e.message);
                 return null;
             }
         }
