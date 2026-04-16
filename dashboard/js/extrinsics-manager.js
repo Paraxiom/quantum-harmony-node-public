@@ -89,7 +89,7 @@ class ExtrinsicsManager {
 
             // --- Transparence Integration ---
             {
-                name: 'TransparenceOracle', index: 33, category: 'Transparence Integration',
+                name: 'TransparenceOracle', index: 32, category: 'Transparence Integration',
                 description: 'Oracle validation anchoring — 6 CI/CD plugin types',
                 calls: [
                     { name: 'submit_validation', index: 0, params: [{ name: 'contract_id', type: 'u64', desc: 'Contract ID' }, { name: 'milestone_id', type: 'u64', desc: 'Milestone ID' }, { name: 'plugin', type: 'u8', desc: '0=Endpoint,1=Coverage,2=CodeAnalysis,3=Deploy,4=Visual,5=Performance' }, { name: 'evidence_hash', type: 'H256', desc: 'SHA-256 of evidence' }, { name: 'verdict', type: 'u8', desc: '0=Pending,1=Pass,2=Fail,3=Error' }, { name: 'score', type: 'u8', desc: 'Quality score 0-100' }, { name: 'ci_commit_hash', type: 'Bytes', desc: 'Git commit SHA (40 chars)' }, { name: 'metadata', type: 'Bytes', desc: 'JSON metadata' }] },
@@ -98,7 +98,7 @@ class ExtrinsicsManager {
                 storage: ['Validations', 'NextValidationId', 'ValidationsByContract', 'ValidationsByMilestone', 'ValidationsInBlock', 'MilestoneStatus']
             },
             {
-                name: 'TransparenceTwoManRule', index: 34, category: 'Transparence Integration',
+                name: 'TransparenceTwoManRule', index: 33, category: 'Transparence Integration',
                 description: 'Two-Man Rule — Fragment A (human) + Fragment B (machine) for payment',
                 calls: [
                     { name: 'initiate_ceremony', index: 0, params: [{ name: 'contract_id', type: 'u64', desc: 'Contract ID' }, { name: 'milestone_id', type: 'u64', desc: 'Milestone ID' }, { name: 'amount_hash', type: 'H256', desc: 'Hash of payment amount' }, { name: 'evidence_hash', type: 'H256', desc: 'Hash of oracle evidence' }] },
@@ -111,7 +111,7 @@ class ExtrinsicsManager {
                 storage: ['Ceremonies', 'NextCeremonyId', 'CeremoniesByContract', 'AuthorizedOracles']
             },
             {
-                name: 'TransparenceDeliverables', index: 35, category: 'Transparence Integration',
+                name: 'TransparenceDeliverables', index: 34, category: 'Transparence Integration',
                 description: 'Contract lifecycle — Draft → Active → InExecution → Completed',
                 calls: [
                     { name: 'create_contract', index: 0, params: [{ name: 'title_hash', type: 'H256', desc: 'SHA-256 of contract title' }, { name: 'devis_hash', type: 'H256', desc: 'SHA-256 of devis technique' }, { name: 'supplier', type: 'AccountId', desc: 'Supplier account' }] },
@@ -127,7 +127,7 @@ class ExtrinsicsManager {
 
             // --- Identity ---
             {
-                name: 'IdentityRegistry', index: 36, category: 'Identity',
+                name: 'IdentityRegistry', index: 35, category: 'Identity',
                 description: 'PQ soulbound NFT identities — register, reputation, key rotation',
                 calls: [
                     { name: 'register_identity', index: 0, params: [{ name: 'role', type: 'u8', desc: '0=Shield,1=Agent,2=OracleReporter,3=Validator,4=Citizen,5=Decideur,6=Fournisseur,7=Service' }, { name: 'algorithm', type: 'u8', desc: '0=Falcon512,1=Falcon1024,2=SphincsPlus,3=MlKem1024' }, { name: 'public_key_hash', type: 'H256', desc: 'SHA-256 of public key' }, { name: 'fingerprint', type: 'Bytes', desc: 'Key fingerprint (e.g. 58:72:ac:47...)' }, { name: 'label', type: 'Bytes', desc: 'Label (e.g. shield-alice-main)' }, { name: 'metadata', type: 'Bytes', desc: 'JSON metadata' }, { name: 'hardware_tier', type: 'u8', desc: '0=Unknown,1=Edge,2=Municipal,3=Enterprise,4=Defence,5=Cloud' }] },

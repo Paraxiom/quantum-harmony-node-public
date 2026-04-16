@@ -1,6 +1,6 @@
 /**
  * QuantumHarmony Identity Manager
- * Manages PQ soulbound NFT identities via pallet-identity-registry (index 36)
+ * Manages PQ soulbound NFT identities via pallet-identity-registry (index 35)
  * Provides registration, browsing, reputation leaderboard, and identity actions.
  */
 
@@ -94,15 +94,15 @@ class IdentityManager {
 
     async fetchIdentityCount() {
         try {
-            // Query IdentityRegistry.IdentityCount storage
-            // Module prefix: IdentityRegistry (index 36)
-            // Storage: IdentityCount — a simple u32 value
+            // Query IdentityRegistry.NextIdentityId storage
+            // Module prefix: IdentityRegistry (pallet index 35)
+            // Storage: NextIdentityId — a u64 counter (next ID to assign = total count)
             const result = await this.rpc('state_getStorage', [
-                this.storageKey('IdentityRegistry', 'IdentityCount')
+                this.storageKey('IdentityRegistry', 'NextIdentityId')
             ]);
             if (result) {
-                // Decode little-endian u32
-                const hex = result.substring(2);
+                // Decode little-endian u64 (NextIdentityId)
+                const hex = result.substring(2).substring(0, 16); // first 8 bytes
                 return parseInt(hex.match(/../g).reverse().join(''), 16) || 0;
             }
             return 0;
@@ -162,11 +162,13 @@ class IdentityManager {
         }
         // Fallback: use a known mapping for our pallet
         const known = {
-            'IdentityRegistry': '9cc552bca41505e8bef5ab77bf4feb54',
-            'IdentityCount':    '57e8e2e931e8c7c51eb1e1b7e3e4b9c2',
-            'Identities':       '58b0e25cc0eec1af4f66f2f92fb7d0c7',
-            'Attestations':     '3a7b9ef24f55cf6a0af3aa7f1c0a04e8',
-            'NextIdentityId':   'c29e54b9f59eab4a4ed01a5d38c8d26f',
+            'IdentityRegistry': 'f916927628db2c8129958320cd6d95ff',
+            'NextIdentityId':   '20288bf941af4d3342ef1b7bc0d42064',
+            'Identities':       '18373f80b4a94950c1f99840fd083e68',
+            'IdentityByFingerprint': '5049f3e11e0efb7e13f88bdf648d3a4f',
+            'IdentityByPublicKeyHash': '8a7ff6b7b18c2e9e73f8e8a2c82f3b49',
+            'IdentitiesByOwner': 'f118e93fd7c22feae5e12e73f4a2c849',
+            'IdentitiesByRole':  '4e7b909fd8e3c9583a8e3cc20c9c6a21',
         };
         return known[input] || '0000000000000000000000000000000000';
     }
@@ -213,11 +215,11 @@ class IdentityManager {
     }
 
     buildRegisterCallData(role, algorithm, hardwareTier, label, pubkeyHash, fingerprint, metadata) {
-        // IdentityRegistry pallet index 36, register_identity call index 0
+        // IdentityRegistry pallet index 35, register_identity call index 0
         // Params: identity_type(u8), display_name(Bytes), sphincs_public_key(Bytes)
         // Extended params encoded as JSON metadata
         let data = '';
-        data += (36).toString(16).padStart(2, '0'); // pallet index
+        data += (35).toString(16).padStart(2, '0'); // pallet index
         data += (0).toString(16).padStart(2, '0');  // call index
         data += this.encodeU8(role);
         data += this.encodeBytes(label);
@@ -230,9 +232,9 @@ class IdentityManager {
     }
 
     buildUpdateMetadataCallData(displayName, metadata) {
-        // IdentityRegistry pallet index 36, update_identity call index 1
+        // IdentityRegistry pallet index 35, update_identity call index 1
         let data = '';
-        data += (36).toString(16).padStart(2, '0');
+        data += (35).toString(16).padStart(2, '0');
         data += (1).toString(16).padStart(2, '0');
         data += this.encodeBytes(displayName);
         data += this.encodeBytes(metadata);
@@ -240,9 +242,9 @@ class IdentityManager {
     }
 
     buildRevokeCallData(targetAccountId) {
-        // IdentityRegistry pallet index 36, revoke_identity call index 3
+        // IdentityRegistry pallet index 35, revoke_identity call index 3
         let data = '';
-        data += (36).toString(16).padStart(2, '0');
+        data += (35).toString(16).padStart(2, '0');
         data += (3).toString(16).padStart(2, '0');
         data += this.encodeAccountId(targetAccountId);
         return '0x' + data;
@@ -565,7 +567,7 @@ function refreshIdentityBrowser() {
             <div style="font-family: 'Orbitron', monospace; font-size: 14px; color: var(--accent-danger); margin-bottom: 8px;">QUERY FAILED</div>
             <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">${escapeHtmlId(e.message)}</div>
             <div style="font-size: 11px; color: var(--text-muted);">
-                Ensure your node is connected and the IdentityRegistry pallet (index 36) is available.
+                Ensure your node is connected and the IdentityRegistry pallet (index 35) is available.
             </div>
         </div>`;
         renderLeaderboard([]);
