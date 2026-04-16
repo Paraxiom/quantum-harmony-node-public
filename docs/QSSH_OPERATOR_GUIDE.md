@@ -1,5 +1,11 @@
 # QSSH Operator Guide
 
+> **Status: NOT YET WIRED (2026-04-16)**
+>
+> The QSSH binary exists and builds (`paraxiom-qssh` repo, 229 tests pass, M0-M4 milestones complete), and a `qsshd-server` container runs on Alice (port 22222). However, the QSSH tunnel is **not yet integrated into `start.sh`** or the standard operator onboarding flow. Operators currently use classical SSH to manage their nodes. This guide describes the **target architecture** — follow it only if you are explicitly setting up the PQ tunnel path.
+>
+> For current operator onboarding, see [BECOME_VALIDATOR.md](./BECOME_VALIDATOR.md).
+
 ## Quantum-Secure Remote Node Access
 
 This guide explains how operators can securely connect to their QuantumHarmony validator nodes running on cloud infrastructure using QSSH (Quantum-Secure Shell).

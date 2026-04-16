@@ -51,7 +51,7 @@ services:
       # Bootnodes use classical-Noise (Ed25519) peer IDs produced by the
       # fallback transport (not the Qm... SPHINCS+/PQC IDs). These must be
       # refreshed any time a validator's network/secret_ed25519 is rotated.
-      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWFcndVYEyhSkLWgYagBqyuNfEX1pSKCKGW6snjCgesqKQ"
+      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWFZUzy2DjKEPsRsnSxUjTwrkuLjQ6Mq53KKixHVSuq59A"
       - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe"
       - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2"
     healthcheck:

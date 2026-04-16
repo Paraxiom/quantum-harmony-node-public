@@ -1,10 +1,12 @@
 # QuantumHarmony Node Operator
 # One-command deployment for node operators
 #
-# Production Validators (Updated 2026-02-27):
-#   - Validator 1 (Alice/Montreal):    51.79.26.123  - 12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
-#   - Validator 2 (Bob/Beauharnois):   51.79.26.168  - 12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD (PRIMARY DB)
-#   - Validator 3 (Charlie/Frankfurt): 209.38.225.4  - 12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x
+# Production Validators (Updated 2026-04-16):
+#   - Validator 1 (Alice/Montreal):    51.79.26.123  - 12D3KooWFZUzy2DjKEPsRsnSxUjTwrkuLjQ6Mq53KKixHVSuq59A
+#   - Validator 2 (Bob/Beauharnois):   51.79.26.168  - 12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe
+#   - Validator 3 (Charlie/Frankfurt): 209.38.225.4  - 12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2
+#   - Validator 4 (Kria/Accra):        community     - (dials bootnodes)
+#   - Validator 5 (Edwin/Accra):       community     - (dials bootnodes)
 #
 # Usage:
 #   docker-compose up -d
@@ -42,9 +44,9 @@ services:
       - "--rpc-external"
       - "--rpc-cors=all"
       - "--rpc-methods=Safe"
-      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
-      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
-      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x"
+      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWFZUzy2DjKEPsRsnSxUjTwrkuLjQ6Mq53KKixHVSuq59A"
+      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe"
+      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2"
       # Node generates unique identity on first run (stored in /data)
     environment:
       - NODE_NAME=${NODE_NAME:-Operator}

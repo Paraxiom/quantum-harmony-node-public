@@ -91,7 +91,7 @@ docker-compose -f docker-compose.operator.yml logs -f
 │   └──────────────────────────────────────────────────┘  │
 │                                                          │
 ├─────────────────────────────────────────────────────────┤
-│   SPHINCS+-256s POST-QUANTUM SECURED                     │
+│   SPHINCS+-SHAKE-256f-simple POST-QUANTUM SECURED                     │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -115,7 +115,7 @@ The dashboard launches automatically at **http://localhost:8080** when you run `
 | **TRANSFER** | Send QMHY tokens to any address. Paste your account key to sign transactions. |
 | **FAUCET** | Request test tokens for your account. Click once, wait for confirmation. |
 | **GOVERN** | On-chain governance: view proposals, vote, submit motions. |
-| **REWARDS** | Track your validator rewards and staking performance. |
+| **REWARDS** | Track your validator block rewards. |
 | **RUNTIME** | Runtime version info and upgrade status. |
 | **KEYS** | Generate session keys, check keystore, rotate keys. Essential for validator setup. |
 | **QUANTUM** | Post-quantum security status — SPHINCS+/Falcon key health and algorithm info. |
@@ -272,7 +272,7 @@ Once registered, your node will start producing blocks. Check:
 
 ## QSSH: Quantum-Secure Remote Access
 
-**QSSH is required for post-quantum security.** Without QSSH, connections use classical cryptography vulnerable to quantum attacks.
+**QSSH is planned but not yet wired into the operator flow.** The binary exists and builds (see [QSSH Operator Guide](./docs/QSSH_OPERATOR_GUIDE.md)), but the current `start.sh` does not use it. Operators currently connect via standard SSH. The QSSH tunnel will provide post-quantum secure remote access in a future release.
 
 ### Install QSSH
 
@@ -306,8 +306,8 @@ qssh -L 9944:localhost:9944 operator@your-validator.cloud:42
 
 | Component    | Algorithm     | Protection   |
 | ------------ | ------------- | ------------ |
-| Key Exchange | Falcon-512    | Post-quantum |
-| Signatures   | SPHINCS+-256f | Hash-based   |
+| Key Exchange | ML-KEM-1024 (Kyber) | Post-quantum (PLANNED — not yet active) |
+| Signatures   | SPHINCS+-SHAKE-256f-simple | Post-quantum (NIST Level 5) |
 | Encryption   | AES-256-GCM   | Symmetric    |
 
 Traditional SSH (RSA/ECDSA) is vulnerable to quantum attacks. QSSH protects your validator connections today against future quantum computers.

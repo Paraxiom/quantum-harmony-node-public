@@ -1,142 +1,92 @@
-# Become a QuantumHarmony Validator
+# QuantumHarmony Validator Onboarding Guide
 
-This guide explains how to join the QuantumHarmony testnet as a validator.
+**Last Verified:** 2026-04-15/16 (tested with Kria + Edwin)
 
-## Overview
-
-QuantumHarmony uses **governance-based validator admission**. New validators must be approved by existing validators before they can produce blocks.
-
-**Process:**
-1. Run your node and sync with the network
-2. Generate your unique SPHINCS+ session key
-3. Submit your public key for governance approval
-4. Wait for validator vote (typically 24-48 hours)
-5. After approval, you'll become active at the next session rotation
+## PREREQUISITES
+- **OS:** Linux (Ubuntu 22.04 recommended) or macOS with Docker
+- **Hardware:** 4+ CPU cores, 8GB+ RAM, 100GB+ SSD
+- **Network:** Public IP with port `30333` open (or NAT traversal configured)
+- **Tools:** Docker installed
 
 ---
 
-## Step 1: Start Your Node
+## STEP-BY-STEP VALIDATOR ONBOARDING
 
+### 1. Clone the Node Repository
 ```bash
-git clone https://github.com/Paraxiom/quantum-harmony-node.git
-cd quantum-harmony-node
-./start.sh
-```
-
-Wait for your node to sync. Check the dashboard at http://localhost:8080
-
-**Sync Status:**
-- Block height should match the network (~increasing every 6 seconds)
-- "Syncing: No" means you're caught up
-- 2-3 peers connected is normal
-
----
-
-## Step 2: Generate Session Key
-
-### Option A: Via Dashboard (Recommended)
-
-1. Open http://localhost:8080
-2. Go to **Key Management** section
-3. Click **Generate New Key**
-4. Copy your **Session Key** (64-byte public key starting with `0x`)
-
-### Option B: Via RPC
-
-```bash
-curl -s http://localhost:9944 \
-  -H "Content-Type: application/json" \
-  -d '{"id":1,"jsonrpc":"2.0","method":"author_rotateKeys","params":[]}' \
-  | jq -r '.result'
-```
-
-**Important:** Your secret key is automatically stored in the node's keystore. Never share your secret key.
-
----
-
-## Step 3: Submit Governance Proposal
-
-Use the **Validator Governance** panel in your dashboard:
-
-1. Open http://localhost:8080
-2. Go to **Validator Governance** tab
-3. Enter your session key in "Validator Account (Public Key)"
-4. Select your signing key in "Sign As"
-5. Click **Propose**
-
-Alternatively, ask an existing validator to propose you:
-- **Telegram Dev Channel:** https://t.me/+dg3-c2KFfd1iMTUx
-- **Email:** sylvain@paraxiom.org
-
----
-
-## Step 4: Validator Voting
-
-After proposal submission:
-
-1. Existing validators see your proposal in their governance panel
-2. They review and vote YES/NO
-3. Voting window: 10 blocks (~1 minute) - but response time depends on validator availability
-4. After voting period ends, anyone can click **Finalize**
-5. If approved (majority yes votes), your key is added to the pending set
-
-**Note:** Validator response time varies. Join the Telegram channel for faster coordination.
-
----
-
-## Step 5: Activation
-
-After governance approval, your validator activates at the **next session rotation**.
-
-- Sessions rotate every ~6 hours
-- Check your logs for: `Number of authorities: 4` (or higher)
-- When active, you'll see: `Claimed slot for block #XXX`
-
-**Verify you're active:**
-```bash
-docker logs quantumharmony-node 2>&1 | grep "Claimed slot"
+git clone https://github.com/Paraxiom/quantum-harmony-node-public.git
+cd quantum-harmony-node-public
 ```
 
 ---
 
-## Troubleshooting
-
-### "Key not found in keystore"
-This is **normal** until your validator is activated. It means:
-- Your node is checking if it should author blocks
-- Your key isn't in the active set yet
-- Wait for session rotation after governance approval
-
-### Node not syncing
-- Check peers: `curl http://localhost:9944 -d '{"id":1,"jsonrpc":"2.0","method":"system_health"}'`
-- Ensure port 30333 is open for P2P
-- Try restarting: `docker-compose restart node`
-
-### Genesis mismatch
-If your genesis hash doesn't match the network:
+### 2. Generate SPHINCS+ Keypair (Locally)
+**Never expose your secret key.**
 ```bash
-git pull
-docker-compose down -v
-./start.sh
+docker run --rm rust:1.85-bookworm bash -c '
+  cargo init --bin /tmp/keygen && cd /tmp/keygen
+  # Add dependencies to Cargo.toml:
+  # pqcrypto-sphincsplus = "0.8.0"
+  # hex = "0.4.3"
+  # main.rs: Generate keypair, print public to stdout, secret to stderr
+  cargo run --release 2>secret.txt
+'
+```
+- **Public key:** Sent to Paraxiom
+- **Secret key:** `secret.txt` (keep it secure!)
+
+---
+
+### 3. Install Secret Key in Keystore
+```bash
+VOLPATH=$(docker volume inspect quantum-harmony-node_node-data --format '{{.Mountpoint}}')
+sudo mkdir -p "$VOLPATH/chains/dev3/keystore"
+KEYSTORE="$VOLPATH/chains/dev3/keystore/61757261<YOUR_64_BYTE_PUBKEY_HEX>"
+echo -n '"0x<YOUR_128_BYTE_SECRET_HEX>"' | sudo tee "$KEYSTORE" > /dev/null
+sudo chmod 600 "$KEYSTORE"
+sudo chown -R 1000:1000 "$VOLPATH/chains"
 ```
 
 ---
 
-## Current Network
+### 4. Submit Public Key to Paraxiom
+Send **only** your public key to:
+- Email: `sylvaincormier@protonmail.com`
+- OR: GitHub issue on [quantum-harmony-node-public](https://github.com/Paraxiom/quantum-harmony-node-public)
 
-**Production Validators:**
-| Validator | Location | Status |
-|-----------|----------|--------|
-| Validator 1 | Montreal, CA | Active |
-| Validator 2 | Beauharnois, CA | Active |
-| Validator 3 | Frankfurt, DE | Active |
-
-**Genesis Hash:** `0xc18cc638862625ae46879052e3fcff864a1ae408a8166b65934ce7e153b8b5e1`
+Paraxiom will execute:
+- `validator_set.addValidator(your_account)`
+- `session.setKeys(your_aura_pubkey)`
 
 ---
 
-## Questions?
+### 5. Fetch Chainspec and Start Node
+```bash
+curl -L -o configs/chain-spec.json https://paraxiom.org/chainspec.json
+sha256sum configs/chain-spec.json  # Must match: dc35f7582f88e320528516167ed26989fa5611a99495be2432d5370003defee6
+NODE_NAME=YourName ./start.sh
+```
 
-- Telegram Dev Channel: https://t.me/+dg3-c2KFfd1iMTUx
-- GitHub Issues: https://github.com/Paraxiom/quantum-harmony-node/issues
-- Email: sylvain@paraxiom.org
+---
+
+### 6. Wait for Activation
+- **Activation delay:** 2 session boundaries (~12 hours)
+- Monitor logs:
+  ```bash
+  docker logs -f quantumharmony-node 2>&1 | grep "CLAIMED"
+  ```
+- **Success:** `"CLAIMED SLOT"` indicates block production.
+
+---
+
+## IMPORTANT SECURITY NOTES
+- 🔒 **Secret Key Security:** Never share or store secret keys in unsecured locations.
+- 🛡️ **Validator Flag:** Ensure `--validator` is set (handled by `start.sh`).
+- ⏳ **Session Period:** 7200 blocks (~6 hours). Activation takes ~12 hours.
+- 🌐 **NAT Configuration:** Use `--public-addr` if behind NAT.
+
+---
+
+## References
+- [Validator Requirements Update Protocol](https://internal.paraxiom.org/procedures/9a452366-7a06-4a45-bd1b-42f109e64be1)
+- [SPHINCS+ Cryptographic Standards](https://pqcrypto.org/sphincsplus/)

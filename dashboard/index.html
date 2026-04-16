@@ -3970,7 +3970,7 @@
 
         // Known validator mapping (legacy - for status tab)
         const KNOWN_VALIDATORS_STATUS = {
-            '12D3KooWFcndVYEyhSkLWgYagBqyuNfEX1pSKCKGW6snjCgesqKQ': { name: 'Alice', ip: '51.79.26.123' },
+            '12D3KooWFZUzy2DjKEPsRsnSxUjTwrkuLjQ6Mq53KKixHVSuq59A': { name: 'Alice', ip: '51.79.26.123' },
             '12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe': { name: 'Bob', ip: '51.79.26.168' },
             '12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2': { name: 'Charlie', ip: '209.38.225.4' },
         };
@@ -5707,7 +5707,7 @@
 
         // Known validator data (bootstrap nodes + approved validators)
         const KNOWN_VALIDATORS = {
-            '12D3KooWFcndVYEyhSkLWgYagBqyuNfEX1pSKCKGW6snjCgesqKQ': { name: 'Alice', ip: '51.79.26.123', location: 'Montreal, Canada', provider: 'OVH', color: '#ff9966', tier: 1 },
+            '12D3KooWFZUzy2DjKEPsRsnSxUjTwrkuLjQ6Mq53KKixHVSuq59A': { name: 'Alice', ip: '51.79.26.123', location: 'Montreal, Canada', provider: 'OVH', color: '#ff9966', tier: 1 },
             '12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe': { name: 'Bob', ip: '51.79.26.168', location: 'Beauharnois, Canada', provider: 'OVH', color: '#66ccff', tier: 1 },
             '12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2': { name: 'Charlie', ip: '209.38.225.4', location: 'Frankfurt, Germany', provider: 'DigitalOcean', color: '#99ff99', tier: 1 },
             '12D3KooWAZF2rTG2mVUBkaUAhdJ71EDgMDvCU1VZiPTpJVj7cVi1': { name: 'Edwin', ip: null, location: 'Africa', provider: 'Community', color: '#ff66cc', tier: 2 }
@@ -6361,8 +6361,8 @@
 
                 // Identify block author from Aura pre-digest slot
                 let authorLabel = '';
-                const authorColors = ['#ff9966', '#66ccff', '#99ff99'];
-                const authorNames = ['Alice', 'Bob', 'Charlie'];
+                const authorColors = ['#ff9966', '#66ccff', '#99ff99', '#ff66cc'];
+                const authorNames = ['Alice', 'Bob', 'Charlie', 'Kria'];
                 let authorName = '?';
                 let authorIndex = 0;
                 // Parse Aura pre-digest from block header to get slot
@@ -6390,7 +6390,7 @@
                                 for (let j = 0; j < 16; j += 2) bytes.push(parseInt(slotHex.slice(j, j+2), 16));
                                 let slot = 0n;
                                 for (let j = 7; j >= 0; j--) slot = (slot << 8n) | BigInt(bytes[j]);
-                                authorIndex = Number(slot % 3n);
+                                authorIndex = Number(slot % BigInt(authorNames.length));
                                 authorName = authorNames[authorIndex] || '?';
                             }
                             break;
