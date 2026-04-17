@@ -162,13 +162,13 @@ class IdentityManager {
         }
         // Fallback: use a known mapping for our pallet
         const known = {
-            'IdentityRegistry': 'f916927628db2c8129958320cd6d95ff',
-            'NextIdentityId':   '20288bf941af4d3342ef1b7bc0d42064',
-            'Identities':       '18373f80b4a94950c1f99840fd083e68',
-            'IdentityByFingerprint': '5049f3e11e0efb7e13f88bdf648d3a4f',
-            'IdentityByPublicKeyHash': '8a7ff6b7b18c2e9e73f8e8a2c82f3b49',
-            'IdentitiesByOwner': 'f118e93fd7c22feae5e12e73f4a2c849',
-            'IdentitiesByRole':  '4e7b909fd8e3c9583a8e3cc20c9c6a21',
+            'IdentityRegistry': '812cdb28769216f9ff956dcd20839529',
+            'NextIdentityId':   '334daf41f98b28206420d4c07b1bef42',
+            'Identities':       '5049a9b4803f3718683e08fd4098f9c1',
+            'IdentityByFingerprint': 'fa277eb20ef3495039bc348761e81c2a',
+            'IdentityByPublicKeyHash': 'cb922b48c5f67f8a95dd2f8e28c55841',
+            'IdentitiesByOwner': '0f8131fafbe918f1487a2e3cc346b75d',
+            'IdentitiesByRole':  'f5a6667329f9af2b86ec3b9897c0be84',
         };
         return known[input] || '0000000000000000000000000000000000';
     }
