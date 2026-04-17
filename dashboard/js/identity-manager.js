@@ -95,7 +95,7 @@ class IdentityManager {
     async fetchIdentityCount() {
         try {
             // Query IdentityRegistry.NextIdentityId storage
-            // Module prefix: IdentityRegistry (pallet index 35)
+            // Module prefix: IdentityRegistry (pallet index 37)
             // Storage: NextIdentityId — a u64 counter (next ID to assign = total count)
             const result = await this.rpc('state_getStorage', [
                 this.storageKey('IdentityRegistry', 'NextIdentityId')
@@ -215,11 +215,11 @@ class IdentityManager {
     }
 
     buildRegisterCallData(role, algorithm, hardwareTier, label, pubkeyHash, fingerprint, metadata) {
-        // IdentityRegistry pallet index 35, register_identity call index 0
+        // IdentityRegistry pallet index 37, register_identity call index 0
         // Params: identity_type(u8), display_name(Bytes), sphincs_public_key(Bytes)
         // Extended params encoded as JSON metadata
         let data = '';
-        data += (35).toString(16).padStart(2, '0'); // pallet index
+        data += (37).toString(16).padStart(2, '0'); // pallet index
         data += (0).toString(16).padStart(2, '0');  // call index
         data += this.encodeU8(role);
         data += this.encodeBytes(label);
@@ -232,9 +232,9 @@ class IdentityManager {
     }
 
     buildUpdateMetadataCallData(displayName, metadata) {
-        // IdentityRegistry pallet index 35, update_identity call index 1
+        // IdentityRegistry pallet index 37, update_identity call index 1
         let data = '';
-        data += (35).toString(16).padStart(2, '0');
+        data += (37).toString(16).padStart(2, '0');
         data += (1).toString(16).padStart(2, '0');
         data += this.encodeBytes(displayName);
         data += this.encodeBytes(metadata);
@@ -242,9 +242,9 @@ class IdentityManager {
     }
 
     buildRevokeCallData(targetAccountId) {
-        // IdentityRegistry pallet index 35, revoke_identity call index 3
+        // IdentityRegistry pallet index 37, revoke_identity call index 3
         let data = '';
-        data += (35).toString(16).padStart(2, '0');
+        data += (37).toString(16).padStart(2, '0');
         data += (3).toString(16).padStart(2, '0');
         data += this.encodeAccountId(targetAccountId);
         return '0x' + data;
