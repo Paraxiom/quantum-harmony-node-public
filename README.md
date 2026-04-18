@@ -177,7 +177,17 @@ Replace `configs/chain-spec.json` with your chain spec.
 
 ## Network
 
-**Production Testnet Bootnodes:**
+**5 active validators** (runtime v33, Aura consensus):
+
+| Validator | Location | Status |
+|-----------|----------|--------|
+| Alice | Montreal, Canada (OVH) | Active — bootnode |
+| Bob | Beauharnois, Canada (OVH) | Active — bootnode |
+| Charlie | Frankfurt, Germany | Active — bootnode |
+| Kria | — | Active |
+| Edwin | Accra, Ghana | Active |
+
+**Bootnodes:**
 
 - Alice: `51.79.26.123`
 - Bob: `51.79.26.168`
