@@ -2,7 +2,48 @@
 
 Run a QuantumHarmony node with one command using Docker.
 
-**QuantumHarmony** is a post-quantum Layer 1 blockchain secured with SPHINCS+ and Falcon-512 signatures — 950 Rust tests, 32 Lean 4 theorems, zero sorries.
+**QuantumHarmony** is a post-quantum Layer 1 blockchain secured with SPHINCS+-SHAKE-256s (Aura) and Falcon-1024 (coherence gadget) signatures — 2,500+ Rust tests, 76 Lean 4 theorems, zero sorries.
+
+## ⚡ 1-click validator onboarding
+
+If you just want to join the network as a validator, skip everything below and run this on a fresh Ubuntu 22.04+ box with docker + systemd:
+
+```bash
+curl -fsSL https://paraxiom.org/qh-bootstrap.sh \
+    | sudo QH_NODE_NAME=your-node-name bash
+```
+
+That one command:
+
+1. Generates your SPHINCS+ aura keypair locally (the secret never leaves your box)
+2. Fetches the current chainspec from paraxiom.org
+3. Creates a docker volume, injects the keystore, starts the validator container
+4. Installs `qh-agent` as a systemd service for monitoring
+5. POSTs your onboarding intent to Paraxiom (sponsor is notified via email)
+6. Polls the chain until your stash is funded (sponsor runs `qh-sponsor` on their side, ~30s)
+7. Automatically submits `set_keys` to register your aura pubkey with `pallet_session`
+8. Exits when you're in the validator set
+
+First block production follows after ~2 session rotations (~1 hour on mainnet-beta).
+
+**Optional env vars for email alerts on your own node:**
+
+```bash
+QH_EMAIL=you@example.com
+QH_SMTP_PASS="your gmail app password"   # 16 chars, no spaces
+```
+
+**Requirements:**
+
+- Ubuntu 22.04 or similar Linux with `systemd`, `docker`, `python3`
+- Port `30333/tcp` reachable from the internet (libp2p peering)
+- `x86_64` CPU (multi-arch image coming)
+- Run as root (`sudo`)
+
+**What the pipeline is / isn't post-quantum:**
+
+- **The chain is PQ.** Your SPHINCS+ secret, every block-production signature, every consensus vote (Falcon-1024), and Keccak-256 hashing are all quantum-safe.
+- **The curl|bash pipeline uses classical TLS** (Let's Encrypt), which is not quantum-safe. All data in flight is public (code, chainspec, intent containing public stash/pubkey); the SPHINCS+ secret is generated on your box and never crosses the wire. Residual risk: MITM injection of a malicious bootstrap.sh — defended against current (classical) attackers by TLS; a PQ-TLS variant via PQTG is on the roadmap.
 
 ## Prerequisites
 
@@ -177,26 +218,27 @@ Replace `configs/chain-spec.json` with your chain spec.
 
 ## Network
 
-**5 active validators** (runtime v33, Aura consensus):
+**Live validators** (runtime v35, Aura consensus + PQ-BFT coherence finality):
 
 | Validator | Location | Status |
 |-----------|----------|--------|
 | Alice | Montreal, Canada (OVH) | Active — bootnode |
 | Bob | Beauharnois, Canada (OVH) | Active — bootnode |
 | Charlie | Frankfurt, Germany | Active — bootnode |
-| Kria | — | Active |
-| Edwin | Accra, Ghana | Active |
+| Kria | Montreal (FPGA edge appliance) | Active |
+| Edwin | Accra, Ghana | Onboarding (Apr 2026) |
 
-**Bootnodes:**
+**Bootnodes (baked into `qh-bootstrap.sh` defaults):**
 
-- Alice: `51.79.26.123`
-- Bob: `51.79.26.168`
-- Charlie: `209.38.225.4`
+- Alice: `/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWD3EPFPnjQUeZ3os6wS7gV4LoTCn7PQs1zDgd2B8G7Byt`
+- Bob: `/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe`
+- Charlie: `/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2`
 
 **Ports Required:**
 
-- `30333` - P2P (must be open for peers)
-- `9944` - RPC (optional, for external access)
+- `30333/tcp` — P2P (must be open for peers)
+- `9944/tcp` — RPC (optional, for external access)
+- `9615/tcp` — Prometheus metrics (optional)
 
 ## Commands
 
@@ -220,7 +262,13 @@ docker-compose ps
 
 ## Become a Validator
 
-Follow these steps to join the network as a validator:
+### Easy path (recommended)
+
+See [⚡ 1-click validator onboarding](#-1-click-validator-onboarding) at the top. One `curl | sudo bash` does everything — keygen, container, agent, intent delivery, stash wait, set_keys. You run zero substrate commands.
+
+### Manual path (if you need fine-grained control)
+
+Follow these steps to join the network as a validator without the 1-click wrapper:
 
 ### Step 1: Start Your Node
 
