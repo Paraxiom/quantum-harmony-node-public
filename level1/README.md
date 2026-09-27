@@ -1,0 +1,54 @@
+# Host a copy of the registry (level 1 node)
+
+Version française : [LISEZMOI.md](LISEZMOI.md)
+
+A level 1 node is a complete copy of the QuantumHarmony public registry on your own machine, on your own network. It verifies every block and every signature it receives. It signs nothing, holds no keys that matter, earns nothing, and costs nothing beyond the machine. Its purpose is that the registry is not kept by one party: if an entry is altered anywhere, your copy stops matching, and `verify.sh` says so.
+
+## What you need
+
+- One machine, physical or virtual: 4 vCPU, 8 GB RAM, SSD. The chain is about 110 GB today and grows about 1.3 GB a day; plan 500 GB.
+- Linux with Docker and Docker Compose v2 (`docker compose version`). Also `curl`, `gpg`, `python3`.
+- Outbound TCP to port 30333 of the three validators (51.79.26.123, 51.79.26.168, 209.38.225.4). No inbound port. No firewall change.
+- About 30 minutes, most of it the download.
+
+## Steps
+
+```bash
+git clone https://github.com/Paraxiom/quantum-harmony-node-public.git
+cd quantum-harmony-node-public/level1
+NODE_NAME=your-institution ./join.sh      # chainspec, signed snapshot, start
+./verify.sh --status                       # a few minutes later
+```
+
+`join.sh` fetches the chainspec and checks its sha256 and its chain id, fetches Paraxiom's signing key and checks its fingerprint, downloads the snapshot and verifies its GPG signature and sha256, puts it in a Docker volume, starts the node, and then checks the genesis block your node actually built. That last check matters: a matching file hash only proves the bytes are the ones we expected, not that they build the network you meant to join. `verify.sh` checks genesis first, then takes your node's last finalized block and asks the public gateway for its hash at the same height. `MATCH` means your copy agrees with the network. `DIVERGENCE` means it does not at that height, and that is a finding: keep the data and write to us. `WRONG CHAIN` means your node is not on this network at all, usually a stale chainspec; re-run `join.sh` and tell us if it persists.
+
+After a reboot or an image update: `./join.sh --start`.
+
+## What the node does and does not do
+
+- It keeps a full copy and verifies SPHINCS+ block seals, SPHINCS+ finality votes and Falcon-512 entry signatures.
+- It does not produce blocks, does not vote, has no validator key, no token, no account. There is nothing to steal on it.
+- Its RPC answers on 127.0.0.1:9944 only, safe methods only. Nothing is exposed to the internet.
+- It writes no personal data: the registry carries fingerprints of documents with a short technical label, not the documents.
+- It sends no telemetry.
+
+## Honest state of the network, September 2026
+
+Test network. Three validators, all operated by Paraxiom, plus one level 1 node at Carleton University since August. A finality correction was deployed on 22 September and has not yet been independently tested. A new node cannot yet synchronize from the genesis block, which is why you start from a signed snapshot. Validator to validator transport is classical today; the post quantum relay is scheduled after 16 October. Six chain divergences occurred in 2026, each diagnosed. None of this changes what a level 1 node is: a verified copy, and a witness.
+
+## Level 2, later
+
+A validator seat (co-signing blocks and finality) is offered by cohort once registration is gated in runtime v46 and the fourth validator has run for a quarter. Holding a level 1 node is the precondition.
+
+## Stop, update, remove
+
+```bash
+docker compose -f docker-compose.yml down          # stop
+docker compose -f docker-compose.yml pull && ./join.sh --start   # update the image
+docker volume rm level1_qh-level1-data             # remove the data (irreversible)
+```
+
+## Contact
+
+Sylvain Cormier, Paraxiom Technologies inc., sylvain@paraxiom.org, 514 804-8434.
+Public read gateway used by `verify.sh`: https://validateurs.paraxiom.org/rpc. Live state page: https://validateurs.paraxiom.org/demo.

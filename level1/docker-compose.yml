@@ -1,0 +1,58 @@
+# QuantumHarmony, level 1 node: a sovereign copy of the registry.
+# No keys, no signing, no token, no inbound port. Outbound connections only.
+#
+#   docker compose -f level1/docker-compose.yml up -d
+#
+# Before first start run ./join.sh (fetches the chainspec and the signed snapshot).
+# Verify at any time with ./verify.sh.
+
+services:
+  node:
+    # Pin to the build the validators run. RELEASE-CHECKLIST.md item 1: this tag
+    # must be published on Docker Hub before the kit is handed to a host.
+    image: ${QH_IMAGE:-sylvaincormier/quantumharmony-node:v45-doorfix-87e178d}
+    platform: linux/amd64
+    container_name: qh-level1
+    restart: always
+    user: "0:0"
+    ports:
+      # RPC reachable from this machine only. Nothing else is published:
+      # the peer to peer port stays inside the container, so the node dials out
+      # and accepts no connection from the internet.
+      - "127.0.0.1:9944:9944"
+    volumes:
+      - qh-level1-data:/data
+      - ./chainspec.json:/config/chainspec.json:ro
+    command:
+      - "--chain=/config/chainspec.json"
+      - "--base-path=/data"
+      - "--database=paritydb"
+      - "--sync=full"
+      - "--name=${NODE_NAME:-level1}"
+      - "--rpc-external"
+      - "--rpc-methods=safe"
+      - "--rpc-port=9944"
+      - "--port=30333"
+      - "--no-mdns"
+      - "--no-telemetry"
+      - "--no-prometheus"
+      # The three Paraxiom validators. Alice and Bob ids match the served chainspec;
+      # Charlie's is the id observed live on 2026-09-25 (the chainspec's is stale,
+      # RELEASE-CHECKLIST.md item 4).
+      - "--bootnodes=/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWMRy2PKy4Eah5Bygj25mzWNbkGVccUrgTrXdALnC31aXP"
+      - "--bootnodes=/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe"
+      - "--bootnodes=/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:9944/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+volumes:
+  qh-level1-data:
