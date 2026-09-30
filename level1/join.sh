@@ -38,7 +38,9 @@ EXPECTED_CHAIN_ID="dev3"
 # handed to a host. Until then this script stops with a clear message.
 SNAPSHOT_URL="https://paraxiom.org/snapshots/level1-latest.tar.gz"
 SNAPSHOT_SHA_URL="${SNAPSHOT_URL}.sha256"
-SNAPSHOT_SIG_URL="${SNAPSHOT_URL}.asc"
+# The signature covers the .sha256 file, and the .sha256 file covers the snapshot.
+# (Signing a 120 GB file directly would mean moving it to the machine that holds the key.)
+SNAPSHOT_SIG_URL="${SNAPSHOT_SHA_URL}.asc"
 
 KEY_URL="https://paraxiom.github.io/apt/paraxiom.gpg"
 KEY_FPR="F138C1E15C0C364B0F94155A3191BE373AA98E2F"   # Paraxiom APT Signing Key <apt@paraxiom.org>
@@ -84,12 +86,12 @@ say "     ok, $KEY_FPR"
 say "3/5  Snapshot"
 curl -sfI "$SNAPSHOT_URL" >/dev/null || die "no snapshot published yet at $SNAPSHOT_URL (Paraxiom has not released it; ask sylvain@paraxiom.org)"
 curl -sfL -o snapshot.sha256 "$SNAPSHOT_SHA_URL" || die "cannot fetch $SNAPSHOT_SHA_URL"
-curl -sfL -o snapshot.asc    "$SNAPSHOT_SIG_URL" || die "cannot fetch $SNAPSHOT_SIG_URL"
+curl -sfL -o snapshot.sha256.asc "$SNAPSHOT_SIG_URL" || die "cannot fetch $SNAPSHOT_SIG_URL"
+gpg --quiet --verify snapshot.sha256.asc snapshot.sha256 || die "the checksum file's signature does not verify"
 curl -fL --progress-bar -o snapshot.tar.gz "$SNAPSHOT_URL" || die "snapshot download failed"
-gpg --quiet --verify snapshot.asc snapshot.tar.gz || die "snapshot signature does not verify"
 exp=$(awk '{print $1}' snapshot.sha256); got=$(sha256sum snapshot.tar.gz | awk '{print $1}')
 [ "$exp" = "$got" ] || die "snapshot sha256 mismatch"
-say "     ok, signature and sha256 verified"
+say "     ok, signed checksum verified, snapshot matches it"
 
 say "4/5  Data volume"
 "${COMPOSE[@]}" down 2>/dev/null || true

@@ -72,9 +72,9 @@
 ## Network Configuration
 
 **Bootnodes**:
-- Alice: `/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWFZUzy2DjKEPsRsnSxUjTwrkuLjQ6Mq53KKixHVSuq59A`
+- Alice: `/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWMRy2PKy4Eah5Bygj25mzWNbkGVccUrgTrXdALnC31aXP`
 - Bob: `/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe`
-- Charlie: `/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWHHixshw8E1pF3tMvAVCjN8ghQERzGTtmMuWrkRc4jwY2`
+- Charlie: `/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x`
 
 ---
 

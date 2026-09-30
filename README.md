@@ -183,7 +183,7 @@ Replace `configs/chain-spec.json` with your chain spec.
 
 **Bootnodes:**
 
-- Alice: `/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWD3EPFPnjQUeZ3os6wS7gV4LoTCn7PQs1zDgd2B8G7Byt`
+- Alice: `/ip4/51.79.26.123/tcp/30333/p2p/12D3KooWMRy2PKy4Eah5Bygj25mzWNbkGVccUrgTrXdALnC31aXP`
 - Bob: `/ip4/51.79.26.168/tcp/30333/p2p/12D3KooWBu3YCQaKegjYqcigpoCMid8emDryvDo2Ld46UEySeHhe`
 - Charlie: `/ip4/209.38.225.4/tcp/30333/p2p/12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x` (id observed live 2026-09-25; the served chainspec still carries an older id, see `level1/RELEASE-CHECKLIST.md`)
 

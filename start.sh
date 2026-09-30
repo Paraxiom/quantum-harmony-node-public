@@ -12,7 +12,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 SNAPSHOT_URL="https://paraxiom.org/snapshots/chaindata-latest.tar.gz"
 CHAINSPEC_URL="https://paraxiom.org/chainspec.json"
-EXPECTED_CHAINSPEC_SHA256="dc35f7582f88e320528516167ed26989fa5611a99495be2432d5370003defee6"
+EXPECTED_CHAINSPEC_SHA256="4f468f152ff4a0e33fa8322ac7cfc6b69a7d527c438d69faa0d440f65630e271"
 COMPOSE_FILE="docker-compose.operator.yml"
 VOLUME_NAME="quantum-harmony-node_node-data"
 

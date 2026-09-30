@@ -63,7 +63,7 @@ Paraxiom will execute:
 ### 5. Fetch Chainspec and Start Node
 ```bash
 curl -L -o configs/chain-spec.json https://paraxiom.org/chainspec.json
-sha256sum configs/chain-spec.json  # Must match: dc35f7582f88e320528516167ed26989fa5611a99495be2432d5370003defee6
+sha256sum configs/chain-spec.json  # Must match: 4f468f152ff4a0e33fa8322ac7cfc6b69a7d527c438d69faa0d440f65630e271
 NODE_NAME=YourName ./start.sh
 ```
 
