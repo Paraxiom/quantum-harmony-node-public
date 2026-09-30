@@ -6,7 +6,9 @@ Un nœud de niveau 1 est une copie complète du registre public QuantumHarmony, 
 
 ## Ce qu'il vous faut
 
-- Une machine, physique ou virtuelle : 4 vCPU, 8 Go de mémoire, disque SSD. La chaîne fait environ 110 Go aujourd'hui et grossit d'environ 1,3 Go par jour ; prévoyez 500 Go.
+- Une machine, physique ou virtuelle, **x86_64 (amd64)** : 4 vCPU, 8 Go de mémoire, disque SSD. L'image du nœud est construite pour amd64 seulement ; sur un Mac Apple Silicon ou une autre machine ARM, elle tournerait en émulation, ce qui n'a pas été testé.
+- Disque : la chaîne fait environ 116 Go aujourd'hui et grossit d'environ 1,3 Go par jour ; prévoyez 500 Go. La première installation demande environ 240 Go libres d'un coup (le téléchargement, puis son extraction). Avec Docker Desktop, augmentez d'abord la limite de disque (Settings > Resources) ; elle est de 64 Go par défaut.
+- Le téléchargement fait environ 116 Go : des heures sur une connexion résidentielle. S'il s'interrompt, relancez `./join.sh` et il reprend où il était.
 - Linux avec Docker et Docker Compose v2 (`docker compose version`). Aussi `curl`, `gpg`, `python3`.
 - Des connexions sortantes en TCP vers le port 30333 des trois validateurs (51.79.26.123, 51.79.26.168, 209.38.225.4). Aucun port entrant. Aucune modification de pare-feu.
 - Une trentaine de minutes, surtout du téléchargement.

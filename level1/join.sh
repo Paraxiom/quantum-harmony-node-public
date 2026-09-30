@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # QuantumHarmony level 1 node: fetch the chainspec and the signed snapshot, then start.
 #
-#   ./join.sh            first start (downloads about 110 GB, verifies, starts)
+#   ./join.sh            first start (downloads about 116 GB, verifies, starts;
+#                        needs about 240 GB free during the install; run it again to resume)
 #   ./join.sh --start    start without touching the data (after a reboot or an update)
 #
 # What this script trusts, and how it checks it:
@@ -34,8 +35,8 @@ CHAINSPEC_SHA256="4f468f152ff4a0e33fa8322ac7cfc6b69a7d527c438d69faa0d440f65630e2
 EXPECTED_GENESIS="0x67a63ee15ecd67f1bcf8437b31800ddd76274db3f06fe6b0c3cf0a9235604008"
 EXPECTED_CHAIN_ID="dev3"
 
-# RELEASE-CHECKLIST.md items 2 and 3: these three files must exist before the kit is
-# handed to a host. Until then this script stops with a clear message.
+# Published 2026-09-30 (RELEASE-CHECKLIST.md items 2 and 3). If they are ever missing,
+# this script stops with a clear message.
 SNAPSHOT_URL="https://paraxiom.org/snapshots/level1-latest.tar.gz"
 SNAPSHOT_SHA_URL="${SNAPSHOT_URL}.sha256"
 # The signature covers the .sha256 file, and the .sha256 file covers the snapshot.
@@ -54,6 +55,11 @@ need() { command -v "$1" >/dev/null 2>&1 || die "missing command: $1"; }
 
 need docker; need curl; need gpg; need python3
 docker compose version >/dev/null 2>&1 || die "Docker Compose v2 is required (docker compose version)"
+case "$(docker info --format '{{.Architecture}}' 2>/dev/null)" in
+  x86_64|amd64) ;;
+  *) say "WARNING: the node image is built for x86_64 (amd64) only. On this machine it runs"
+     say "         under emulation, which has not been tested and may not keep up with the chain." ;;
+esac
 if ! command -v sha256sum >/dev/null 2>&1; then sha256sum() { shasum -a 256 "$@"; }; fi
 
 start_only() {
@@ -84,13 +90,47 @@ gpg --quiet --import paraxiom.gpg
 say "     ok, $KEY_FPR"
 
 say "3/5  Snapshot"
-curl -sfI "$SNAPSHOT_URL" >/dev/null || die "no snapshot published yet at $SNAPSHOT_URL (Paraxiom has not released it; ask sylvain@paraxiom.org)"
+size=$(curl -sfIL "$SNAPSHOT_URL" | awk 'tolower($1)=="content-length:"{v=$2} END{gsub(/\r/,"",v); print v}') \
+  || die "no snapshot published yet at $SNAPSHOT_URL (Paraxiom has not released it; ask sylvain@paraxiom.org)"
+[ -n "$size" ] || die "no snapshot published yet at $SNAPSHOT_URL (Paraxiom has not released it; ask sylvain@paraxiom.org)"
+gb=$(( size / 1000000000 + 1 ))
 curl -sfL -o snapshot.sha256 "$SNAPSHOT_SHA_URL" || die "cannot fetch $SNAPSHOT_SHA_URL"
 curl -sfL -o snapshot.sha256.asc "$SNAPSHOT_SIG_URL" || die "cannot fetch $SNAPSHOT_SIG_URL"
-gpg --quiet --verify snapshot.sha256.asc snapshot.sha256 || die "the checksum file's signature does not verify"
-curl -fL --progress-bar -o snapshot.tar.gz "$SNAPSHOT_URL" || die "snapshot download failed"
-exp=$(awk '{print $1}' snapshot.sha256); got=$(sha256sum snapshot.tar.gz | awk '{print $1}')
-[ "$exp" = "$got" ] || die "snapshot sha256 mismatch"
+# Accept only a valid signature made by the pinned key. (gpg's "not certified" warning is
+# about its web of trust; the key's fingerprint was already checked in step 2.)
+gpg --batch --status-fd 1 --verify snapshot.sha256.asc snapshot.sha256 2>/dev/null \
+  | grep -q "^\[GNUPG:\] VALIDSIG $KEY_FPR " || die "the checksum file's signature does not verify"
+say "     ok, checksum file signed by $KEY_FPR"
+exp=$(awk '{print $1}' snapshot.sha256)
+
+# Check the disk BEFORE a download that takes hours. The archive lands in this folder;
+# the database is extracted into a Docker volume, which may be on another disk (and on
+# Docker Desktop lives inside its virtual disk, 64 GB by default), so each is measured
+# where it will actually be written.
+have=0; [ -f snapshot.tar.gz ] && have=$(wc -c < snapshot.tar.gz | tr -d ' ')
+free_here=$(( $(df -Pk . | awk 'NR==2{print $4}') * 1024 ))
+[ $(( free_here + have )) -gt $(( size + 2000000000 )) ] \
+  || die "not enough space here for the ${gb} GB download: $(( free_here / 1000000000 )) GB free in $(pwd)"
+docker volume create qh-level1-spacecheck >/dev/null
+free_vol=$(( $(docker run --rm -v qh-level1-spacecheck:/data alpine df -Pk /data 2>/dev/null | awk 'NR==2{print $4}') * 1024 ))
+docker volume rm qh-level1-spacecheck >/dev/null
+docker volume inspect "$VOLUME" >/dev/null 2>&1 && free_vol=$(( free_vol + size ))   # replaced in step 4
+[ "$free_vol" -gt $(( size * 11 / 10 )) ] \
+  || die "not enough space for Docker volumes: $(( free_vol / 1000000000 )) GB free, the database needs about $(( gb * 11 / 10 )) GB.
+     On Docker Desktop, raise Settings > Resources > Disk usage limit, then run ./join.sh again."
+say "     disk ok: ${gb} GB to download, $(( free_here / 1000000000 )) GB free here, $(( free_vol / 1000000000 )) GB for Docker volumes"
+
+# Resumable: a dropped connection continues where it stopped when ./join.sh is run again.
+[ "$have" -gt "$size" ] && { rm -f snapshot.tar.gz; have=0; }   # left over from an older snapshot
+tries=0
+while [ "$have" -ne "$size" ]; do
+  tries=$(( tries + 1 )); [ "$tries" -le 20 ] || die "snapshot download keeps failing; run ./join.sh again later to resume"
+  curl -fL -C - --progress-bar -o snapshot.tar.gz "$SNAPSHOT_URL" || { say "     connection lost, resuming in 10 s"; sleep 10; }
+  have=$(wc -c < snapshot.tar.gz | tr -d ' ')
+done
+say "     checking the download (a few minutes)"
+got=$(sha256sum snapshot.tar.gz | awk '{print $1}')
+[ "$exp" = "$got" ] || { rm -f snapshot.tar.gz; die "snapshot sha256 mismatch (file removed; run ./join.sh again)"; }
 say "     ok, signed checksum verified, snapshot matches it"
 
 say "4/5  Data volume"
