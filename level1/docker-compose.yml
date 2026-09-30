@@ -23,6 +23,14 @@ services:
     volumes:
       - qh-level1-data:/data
       - ./chainspec.json:/config/chainspec.json:ro
+    environment:
+      # The same two switches all three validators run with (checked 2026-09-30).
+      # Without the first, the image starts the post-quantum transport, the
+      # validators (classical transport today) cannot talk to it, and the node
+      # stays at 0 peers forever: seen on a test node started from the snapshot.
+      # Blocks and finality votes are still signed with SPHINCS+ either way.
+      DISABLE_PQC_TRANSPORT: "1"
+      DISABLE_QUANTUM_P2P: "1"
     command:
       - "--chain=/config/chainspec.json"
       - "--base-path=/data"
