@@ -26,6 +26,20 @@ NODE_NAME=your-institution ./join.sh      # chainspec, signed snapshot, start
 
 After a reboot or an image update: `./join.sh --start`.
 
+## Use the registry: check a document
+
+Once your node is up to date:
+
+```sh
+./verifier.sh
+```
+
+The "Vérifier un document" page opens in your browser. Drop a file: its fingerprint is computed on your machine, the file goes nowhere, and your own node answers whether it was recorded, by whom and when.
+
+To try it: drop `verifier/exemples/proces-verbal-exemple.txt`, recorded by Paraxiom (demonstration). The page says "Inscrit". Then drop `proces-verbal-exemple-modifie.txt`, where one amount differs: "Aucune inscription pour ce fichier exact". The registry keeps each document's fingerprint with a short technical label, never its content.
+
+Recording your own documents will be done by the reporter, in development.
+
 ## What the node does and does not do
 
 - It keeps a full copy and verifies SPHINCS+ block seals, SPHINCS+ finality votes and Falcon-512 entry signatures.

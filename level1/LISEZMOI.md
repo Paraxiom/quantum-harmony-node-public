@@ -26,6 +26,20 @@ NODE_NAME=votre-organisme ./join.sh        # chainspec, instantané signé, dém
 
 Après un redémarrage ou une mise à jour de l'image : `./join.sh --start`.
 
+## Utiliser le registre : vérifier un document
+
+Une fois le nœud à jour :
+
+```sh
+./verifier.sh
+```
+
+La page « Vérifier un document » s'ouvre dans votre navigateur. Déposez un fichier : son empreinte est calculée sur votre appareil, le fichier n'est envoyé nulle part, et c'est votre propre nœud qui répond s'il a été inscrit, par qui et quand.
+
+Pour essayer : déposez `verifier/exemples/proces-verbal-exemple.txt`, inscrit par Paraxiom (démonstration). La page répond « Inscrit ». Déposez ensuite `proces-verbal-exemple-modifie.txt`, où un seul montant diffère : « Aucune inscription pour ce fichier exact ». Le registre ne garde que l'empreinte de chaque document, avec un court libellé technique, jamais son contenu.
+
+Inscrire vos propres documents se fera avec le rapporteur, en développement.
+
 ## Ce que le nœud fait et ne fait pas
 
 - Il garde une copie complète et vérifie les sceaux de blocs SPHINCS+, les votes de finalité SPHINCS+ et les signatures d'inscription Falcon-512.
