@@ -121,22 +121,21 @@ docker-compose -f docker-compose.operator.yml logs -f
 
 ## LCARS Dashboard Guide
 
-The dashboard launches automatically at **http://localhost:8080** when you run `./start.sh`. It's a Star Trek LCARS-styled operator interface with 12 tabs:
+The dashboard launches automatically at **http://localhost:8080** when you run `./start.sh`. It's a Star Trek LCARS-styled operator interface:
 
 | Tab | What it does |
 | --- | --- |
 | **STATUS** | Block height, peer count, sync progress, finalized head. Check here first to confirm your node is syncing. |
-| **TRANSFER** | Send QMHY tokens to any address. Paste your account key to sign transactions. |
-| **FAUCET** | Request test tokens for your account. Click once, wait for confirmation. |
+| **TRANSFER** | Send QMHY, the test network's unit for fees. It has no value. Paste your account key to sign. |
+| **FAUCET** | Not open to the public. Admitted validators get the small amount of QMHY needed for fees from the network operator. |
 | **GOVERN** | On-chain governance: view proposals, vote, submit motions. |
-| **REWARDS** | Track your validator block rewards. |
+| **REWARDS** | Not used: no rewards are paid on the test network. |
 | **RUNTIME** | Runtime version info and upgrade status. |
 | **KEYS** | Generate session keys, check keystore, rotate keys. Essential for validator setup. |
 | **QUANTUM** | Post-quantum security status — SPHINCS+/Falcon key health and algorithm info. |
 | **NETWORK** | Live peer map, connection topology, bootnode status. |
 | **SIGNALS** | Network signals and event stream. |
 | **PROOFS** | On-chain proof verification and attestation status. |
-| **QUESTS** | Gamified onboarding (Devonomics) — earn QMHY by completing validator milestones. |
 | **SETTINGS** | Node name, RPC endpoint, display preferences. |
 
 ### First-time walkthrough
@@ -144,7 +143,7 @@ The dashboard launches automatically at **http://localhost:8080** when you run `
 1. Open **http://localhost:8080**
 2. Check **STATUS** — wait until sync progress shows blocks increasing
 3. Go to **KEYS** → click **CHECK KEYSTORE** to see current state
-4. Go to **FAUCET** → request test tokens
+4. Ask the network operator for the small amount of QMHY needed for fees
 5. Go to **KEYS** → **ROTATE SESSION KEYS** to generate your validator keys
 6. Send your account address, peer ID, and session keys to the network admin (see [Become a Validator](#become-a-validator) below)
 
@@ -154,7 +153,7 @@ We're building an autonomous node operator agent that monitors health, handles u
 
 ## On QMHY
 
-QMHY is the chain's internal unit for transaction fees on the test network. It has no value, is not sold, and nobody is paid in it for hosting a copy or producing blocks. The earlier "Devonomics" rewards scheme has been withdrawn.
+QMHY is the chain's internal unit for transaction fees on the test network. It has no value, is not sold, and nobody is paid in it for hosting a copy or producing blocks. The earlier "Devonomics" rewards scheme has been withdrawn, and runtime spec 47 removed it from the chain.
 
 ## Configuration
 
@@ -240,11 +239,9 @@ Wait for sync to complete (check dashboard at http://localhost:8080 - STATUS tab
 4. **SAVE YOUR MNEMONIC** - it will only be shown once!
 5. Your address appears in the header
 
-### Step 3: Get Test Tokens
+### Step 3: Get QMHY for fees
 
-1. Go to **FAUCET** section
-2. Click to request QMHY tokens
-3. Wait for confirmation
+Ask the network operator for the small amount of QMHY needed to register your session keys. QMHY has no value and is not sold.
 
 ### Step 4: Generate Session Keys
 
