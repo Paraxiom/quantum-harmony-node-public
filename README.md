@@ -155,6 +155,13 @@ We're building an autonomous node operator agent that monitors health, handles u
 
 QMHY is the chain's internal unit for transaction fees on the test network. It has no value, is not sold, and nobody is paid in it for hosting a copy or producing blocks. The earlier "Devonomics" rewards scheme has been withdrawn, and runtime spec 47 removed it from the chain.
 
+## Source code
+
+The node, runtime and pallets are public: https://github.com/Paraxiom/quantumharmony-node-src
+(GPL-3.0 or a Paraxiom commercial licence for the node; Apache-2.0 for the runtime and pallets).
+It depends on our polkadot-sdk fork with SPHINCS+ and Falcon signatures:
+https://github.com/Paraxiom/polkadot-sdk-pq
+
 ## Configuration
 
 ### Environment Variables
