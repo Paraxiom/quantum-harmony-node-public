@@ -111,7 +111,6 @@ case "${1:-}" in
         echo "  Faucet:     http://localhost:8085"
         echo "  KYC API:    http://localhost:8200"
         echo "  Operator:   http://localhost:9955"
-        echo "  QRNG:       http://localhost:8106"
         echo ""
         echo "View logs: docker-compose -f $COMPOSE_FILE logs -f"
         ;;

@@ -2,7 +2,7 @@
 
 Run a QuantumHarmony node with Docker.
 
-**QuantumHarmony** is a post-quantum Layer 1 chain: block seals and finality votes in SPHINCS+, entries in Falcon-512. It carries a public registry of commitments kept as full copies by its members. Test network, three validators plus a university full node, runtime specification 45.
+**QuantumHarmony** is a post-quantum Layer 1 chain: block seals and finality votes in SPHINCS+, entries in Falcon-512. It carries a public registry of commitments kept as full copies by its members. Test network, three validators plus a university full node, runtime version 47 since 6 October 2026.
 
 ## Host a copy of the registry (level 1) — start here
 
@@ -13,11 +13,20 @@ If you are an institution asked to hold a sovereign copy, use the level 1 kit an
 
 One machine, outbound connections only, no keys, no signing, no token, no fee. `level1/join.sh` fetches the chainspec and a signed snapshot and starts the node; `level1/verify.sh` checks your copy against the network.
 
+## Check a document in your browser
+
+Both ways are read only. The file is fingerprinted on your own device and never sent anywhere. Neither page holds a key, signs anything or stores anything.
+
+- **With your own copy of the registry** (independent of Paraxiom): `cd level1 && ./verifier.sh` opens the "Vérifier un document" page against your node at 127.0.0.1:9944.
+- **Without installing anything:** [validateurs.paraxiom.org/demo](https://validateurs.paraxiom.org/demo/) reads the chain through Paraxiom's public read only gateway. Good for a first look; for a check that does not depend on Paraxiom, use your own copy.
+
+Try it with `level1/verifier/exemples/proces-verbal-exemple.txt` (recorded, demonstration) and `proces-verbal-exemple-modifie.txt` (one amount changed: no record).
+
 ## Validator seats
 
-Validator seats (block production and finality signing) are **not open by self service**. They are offered by cohort to institutions that already host a level 1 node, once validator registration is gated in runtime v46 and the fourth validator has run for a quarter. The former "1-click validator onboarding" pipeline has been withdrawn for that reason. The material below describes the operator stack used by Paraxiom's own validators and is kept for reference.
+Validator seats (block production and finality signing) are **not open by self service**. They are offered by cohort to institutions that already host a level 1 node, once validator registration is fully gated by the runtime and the fourth validator has run for a quarter. The former "1-click validator onboarding" pipeline has been withdrawn for that reason. The material below describes the operator stack used by Paraxiom's own validators and is kept for reference.
 
-**What is and is not post quantum today:** block seals and finality votes are SPHINCS+, entries are Falcon-512; the transport between validators is classical (libp2p Noise), with a post quantum relay per connection validated on a devnet and scheduled for cutover after 16 October 2026.
+**What is and is not post quantum today:** block seals and finality votes are SPHINCS+, entries are Falcon-512; the transport between validators is classical (libp2p Noise); a post quantum relay per connection has been validated on a devnet and is not yet in service.
 
 ## Prerequisites
 
@@ -77,7 +86,7 @@ The operator dashboard launches automatically at **http://localhost:8080**.
 | --- | --- |
 | `./start.sh` | Node + LCARS dashboard (default) |
 | `./start.sh --bootstrap` | Download chain snapshot first, then start (recommended for first-time setup) |
-| `./start.sh --full` | Full stack: node + dashboard + faucet + KYC + QRNG (requires `.env`) |
+| `./start.sh --full` | Full stack: node + dashboard + faucet + KYC (requires `.env`) |
 
 ### Manual Start
 

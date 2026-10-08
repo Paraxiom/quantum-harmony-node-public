@@ -74,7 +74,7 @@ CREATE TABLE biometric_helper_data (
     ipfs_cid VARCHAR(64),
 
     -- QRNG source information
-    qrng_source VARCHAR(50) DEFAULT 'crypto4a',
+    qrng_source VARCHAR(50) DEFAULT 'simulator',
     qrng_timestamp TIMESTAMPTZ,
 
     -- Timestamps

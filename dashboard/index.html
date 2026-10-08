@@ -1386,7 +1386,7 @@
                     <div class="form-group">
                         <select class="form-input" id="entropySource" onchange="onEntropySourceChange()">
                             <option value="hub">Entropy Hub (Aggregator)</option>
-                            <option value="crypto4a">Crypto4A QRNG</option>
+                            <option value="crypto4a">External RNG (HSM)</option>
                             <option value="qkd">QKD Device</option>
                         </select>
                     </div>
@@ -1429,7 +1429,7 @@
                         </div>
                     </div>
 
-                    <div class="section-title">Crypto4A HSM (QRNG/RNG Entropy)</div>
+                    <div class="section-title">External RNG (HSM)</div>
                     <div class="info-box" id="crypto4aRngBox">
                         <div class="info-row">
                             <span class="info-label">Description</span>
@@ -1599,7 +1599,7 @@
                             </div>
                             <div class="stat-card">
                                 <div class="stat-label">SOURCE</div>
-                                <div class="stat-value" id="qrngSource" style="font-size: 10px;">Crypto4A Sim</div>
+                                <div class="stat-value" id="qrngSource" style="font-size: 10px;">Simulator</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-label">NETWORK SHARES</div>
@@ -4793,10 +4793,10 @@
             log(`Entropy source: ${source}`, 'info');
         }
 
-        // Crypto4A QRNG functions
+        // External RNG functions
         async function testCrypto4aRng() {
             const endpoint = document.getElementById('crypto4aEndpoint').value;
-            log(`Testing Crypto4A QRNG at ${endpoint}...`, 'info');
+            log(`Testing external RNG at ${endpoint}...`, 'info');
 
             try {
                 const res = await fetch(`${endpoint}?size=8`);
@@ -4807,20 +4807,20 @@
                     document.getElementById('crypto4aStatus').style.color = 'var(--accent-success)';
                     document.getElementById('crypto4aEntropy').textContent = '0x' + hex;
                     localStorage.setItem('lastQrngEntropy', Date.now().toString());
-                    log(`Crypto4A QRNG online - received: 0x${hex}`, 'info');
+                    log(`External RNG online - received: 0x${hex}`, 'info');
                 } else {
                     throw new Error(`HTTP ${res.status}`);
                 }
             } catch (e) {
                 document.getElementById('crypto4aStatus').textContent = 'Offline';
                 document.getElementById('crypto4aStatus').style.color = 'var(--accent-danger)';
-                log(`Crypto4A QRNG error: ${e.message}`, 'error');
+                log(`External RNG error: ${e.message}`, 'error');
             }
         }
 
         async function fetchCrypto4aEntropy(bytes) {
             const endpoint = document.getElementById('crypto4aEndpoint').value;
-            log(`Fetching ${bytes} bytes from Crypto4A QRNG...`, 'info');
+            log(`Fetching ${bytes} bytes from the external RNG...`, 'info');
 
             try {
                 const res = await fetch(`${endpoint}?size=${bytes}`);

@@ -124,26 +124,6 @@ services:
       retries: 3
 
   # =====================================================
-  # CRYPTO4A-SIMULATOR: QRNG Entropy Source
-  # =====================================================
-  crypto4a-simulator:
-    image: sylvaincormier/quantumharmony-crypto4a:latest
-    container_name: quantumharmony-crypto4a
-    restart: unless-stopped
-    ports:
-      - "8106:8106"
-    environment:
-      - PORT=8106
-    networks:
-      - quantum-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8106/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-
-  # =====================================================
   # OPERATOR: PQ-Encrypted Messaging Service
   # =====================================================
   operator:
@@ -197,7 +177,7 @@ services:
       start_period: 15s
 
   # =====================================================
-  # DASHBOARD: Notarial Service Web UI (LCARS)
+  # DASHBOARD: operator web UI (Paraxiom validators)
   # =====================================================
   dashboard:
     image: sylvaincormier/quantumharmony-dashboard:latest
@@ -208,10 +188,7 @@ services:
     volumes:
       - ./configs/nginx-dashboard.conf:/etc/nginx/conf.d/default.conf:ro
       - ./dashboard/index.html:/usr/share/nginx/html/index.html:ro
-      - ./notarial/lcars.html:/usr/share/nginx/html/lcars.html:ro
-      - ./notarial/app.html:/usr/share/nginx/html/app.html:ro
-      - ./notarial/index-lcars.html:/usr/share/nginx/html/index-lcars.html:ro
-      - ./notarial/js:/usr/share/nginx/html/js:ro
+      - ./dashboard/js:/usr/share/nginx/html/js:ro
     networks:
       - quantum-net
     depends_on:
