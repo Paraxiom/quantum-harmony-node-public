@@ -7,9 +7,10 @@ A level 1 node is a complete copy of the QuantumHarmony public registry on your 
 ## What you need
 
 - One machine, physical or virtual, **x86_64 (amd64)**: 4 vCPU, 8 GB RAM, SSD. The node image is built for amd64 only; on an Apple Silicon Mac or another ARM machine it would run under emulation, which has not been tested.
-- Disk: the chain is about 116 GB today and grows about 1.3 GB a day; plan 500 GB. The first install needs about 240 GB free at once (the download, then its extraction). On Docker Desktop, raise the disk usage limit first (Settings > Resources); the default is 64 GB.
-- The download is about 116 GB: hours on a home connection. If it stops, run `./join.sh` again and it resumes.
+- Disk: the chain was about 116 GB on 2 October 2026 and grows about 1.3 GB a day; plan 500 GB. The first install needs about 240 GB free at once with the 30 September snapshot (the download, then its extraction), and more with later snapshots. On Docker Desktop, raise the disk usage limit first (Settings > Resources); the default is 64 GB.
+- The download is the signed snapshot, about 116 GB for the 30 September one: hours on a home connection. If it stops, run `./join.sh` again and it resumes.
 - Linux with Docker and Docker Compose v2 (`docker compose version`). Also `curl`, `gpg`, `python3`.
+- On Windows, use a Linux virtual machine (Hyper-V, VMware or a cloud provider). WSL2 with Docker Desktop should also work, but it has not been tested yet.
 - Outbound TCP to port 30333 of the three validators (51.79.26.123, 51.79.26.168, 209.38.225.4). No inbound port. No firewall change.
 - About 30 minutes, most of it the download.
 
@@ -48,13 +49,13 @@ Recording your own documents will be done by the reporter, in development.
 - It writes no personal data: the registry carries fingerprints of documents with a short technical label, not the documents.
 - It sends no telemetry.
 
-## Honest state of the network, September 2026
+## Honest state of the network, October 2026
 
-Test network. Three validators, all operated by Paraxiom, plus one level 1 node at Carleton University since August. A finality correction was deployed on 22 September and has not yet been independently tested. A new node cannot yet synchronize from the genesis block, which is why you start from a signed snapshot. Validator to validator transport is classical today; the post quantum relay is scheduled after 16 October. Six chain divergences occurred in 2026, each diagnosed. None of this changes what a level 1 node is: a verified copy, and a witness.
+Test network. Three validators, all operated by Paraxiom, plus one level 1 node at Carleton University since August. Runtime version 47 has been live since 6 October. A finality correction was deployed on 22 September and has not yet been independently tested. A new node cannot yet synchronize from the genesis block, which is why you start from a signed snapshot. Validator to validator transport is classical today; the post quantum relay is not yet in service. Six chain divergences occurred in 2026, each diagnosed. None of this changes what a level 1 node is: a verified copy, and a witness.
 
 ## Level 2, later
 
-A validator seat (co-signing blocks and finality) is offered by cohort once registration is gated in runtime v46 and the fourth validator has run for a quarter. Holding a level 1 node is the precondition.
+A validator seat (co-signing blocks and finality) is offered by cohort once validator registration is fully gated by the runtime and the fourth validator has run for a quarter. Holding a level 1 node is the precondition.
 
 ## Stop, update, remove
 

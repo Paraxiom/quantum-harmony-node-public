@@ -7,9 +7,10 @@ Un nœud de niveau 1 est une copie complète du registre public QuantumHarmony, 
 ## Ce qu'il vous faut
 
 - Une machine, physique ou virtuelle, **x86_64 (amd64)** : 4 vCPU, 8 Go de mémoire, disque SSD. L'image du nœud est construite pour amd64 seulement ; sur un Mac Apple Silicon ou une autre machine ARM, elle tournerait en émulation, ce qui n'a pas été testé.
-- Disque : la chaîne fait environ 116 Go aujourd'hui et grossit d'environ 1,3 Go par jour ; prévoyez 500 Go. La première installation demande environ 240 Go libres d'un coup (le téléchargement, puis son extraction). Avec Docker Desktop, augmentez d'abord la limite de disque (Settings > Resources) ; elle est de 64 Go par défaut.
-- Le téléchargement fait environ 116 Go : des heures sur une connexion résidentielle. S'il s'interrompt, relancez `./join.sh` et il reprend où il était.
+- Disque : la chaîne faisait environ 116 Go le 2 octobre 2026 et grossit d'environ 1,3 Go par jour ; prévoyez 500 Go. La première installation demande environ 240 Go libres d'un coup avec l'instantané du 30 septembre (le téléchargement, puis son extraction), et davantage avec les instantanés suivants. Avec Docker Desktop, augmentez d'abord la limite de disque (Settings > Resources) ; elle est de 64 Go par défaut.
+- Le téléchargement est l'instantané signé, environ 116 Go pour celui du 30 septembre : des heures sur une connexion résidentielle. S'il s'interrompt, relancez `./join.sh` et il reprend où il était.
 - Linux avec Docker et Docker Compose v2 (`docker compose version`). Aussi `curl`, `gpg`, `python3`.
+- Sous Windows, utilisez une machine virtuelle Linux (Hyper-V, VMware ou un fournisseur infonuagique). WSL2 avec Docker Desktop devrait aussi fonctionner, mais n'a pas encore été testé.
 - Des connexions sortantes en TCP vers le port 30333 des trois validateurs (51.79.26.123, 51.79.26.168, 209.38.225.4). Aucun port entrant. Aucune modification de pare-feu.
 - Une trentaine de minutes, surtout du téléchargement.
 
@@ -48,13 +49,13 @@ Inscrire vos propres documents se fera avec le rapporteur, en développement.
 - Il n'écrit aucun renseignement personnel : le registre porte des empreintes de documents avec un court libellé technique, pas les documents.
 - Il n'envoie aucune télémétrie.
 
-## État réel du réseau, septembre 2026
+## État réel du réseau, octobre 2026
 
-Réseau d'essai. Trois validateurs, tous exploités par Paraxiom, plus un nœud de niveau 1 à l'Université Carleton depuis août. Un correctif de finalisation a été déployé le 22 septembre et n'a pas encore été testé de façon indépendante. Un nouveau nœud ne peut pas encore se synchroniser depuis le bloc de genèse, d'où le départ sur un instantané signé. Le transport entre validateurs est classique aujourd'hui ; le relais post-quantique est prévu après le 16 octobre. Six divergences de chaîne sont survenues en 2026, chacune diagnostiquée. Rien de cela ne change ce qu'est un nœud de niveau 1 : une copie vérifiée, et un témoin.
+Réseau d'essai. Trois validateurs, tous exploités par Paraxiom, plus un nœud de niveau 1 à l'Université Carleton depuis août. La version 47 du runtime est en service depuis le 6 octobre. Un correctif de finalisation a été déployé le 22 septembre et n'a pas encore été testé de façon indépendante. Un nouveau nœud ne peut pas encore se synchroniser depuis le bloc de genèse, d'où le départ sur un instantané signé. Le transport entre validateurs est classique aujourd'hui ; le relais post-quantique n'est pas encore en service. Six divergences de chaîne sont survenues en 2026, chacune diagnostiquée. Rien de cela ne change ce qu'est un nœud de niveau 1 : une copie vérifiée, et un témoin.
 
 ## Niveau 2, plus tard
 
-Un siège de validateur (cosigner les blocs et la finalité) est offert par cohorte une fois l'inscription verrouillée dans la version 46 du runtime et le quatrième validateur en service depuis un trimestre. Héberger un nœud de niveau 1 est le préalable.
+Un siège de validateur (cosigner les blocs et la finalité) est offert par cohorte une fois l'inscription des validateurs entièrement verrouillée par le runtime et le quatrième validateur en service depuis un trimestre. Héberger un nœud de niveau 1 est le préalable.
 
 ## Arrêter, mettre à jour, retirer
 
