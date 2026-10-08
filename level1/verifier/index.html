@@ -63,21 +63,24 @@
   <section class="result" id="result" aria-live="polite"></section>
 
   <div class="node">
-    <label for="rpc">Nœud interrogé (votre propre copie du registre) :</label>
-    <input id="rpc" value="http://127.0.0.1:9944">
+    <label for="rpc" id="rpclabel">Nœud interrogé (votre propre copie du registre) :</label>
+    <input id="rpc">
     <p id="status">…</p>
   </div>
 </main>
 <script>
-// Known authors. A record only carries the author's account; names come from here.
+// Known authors. A record carries the author's account (SS58); names come from here.
 const AUTHORS = {
-  "0xec9b7ae4333a1e17fa4060b17f4620b2f1d10cffce340ab7ba6a867047dbd46c": "Paraxiom (démonstration)",
+  "5HQwLyQjcPCpL5T8p3jifVUC8rBxfKXfSzazStmbH4FwnBmT": "Paraxiom (démonstration)",
 };
-const STATUS = ["Active", "Révoquée", "Expirée", "Certifiée"];
-const CATEGORY = ["Diplôme", "Document juridique", "Contrat", "Propriété intellectuelle", "Identité",
-                  "Document financier", "Médical", "Autre", "Ancrage d'audit"];
+const STATUS = { Active: "Active", Revoked: "Révoquée", Expired: "Expirée", Certified: "Certifiée" };
+const CATEGORY = { "Academic Credential": "Diplôme", "Legal Document": "Document juridique", "Contract": "Contrat",
+  "Intellectual Property": "Propriété intellectuelle", "Identity": "Identité", "Financial": "Document financier",
+  "Medical": "Médical", "Other": "Autre", "Audit Anchor": "Ancrage d'audit" };
 const BLOCK_SECONDS = 3;
-const TIMESTAMP_NOW_KEY = "0xf0c365c3cf59d671eb72da0e7a4113c49f1f0515f462cdcf84e0f1d6045dfcbb";
+// On the public site, the public read-only gateway; anywhere else, your own node.
+const PUBLIC_SITE = location.hostname === "validateurs.paraxiom.org";
+const DEFAULT_RPC = PUBLIC_SITE ? "/rpc" : "http://127.0.0.1:9944";
 
 const $ = (id) => document.getElementById(id);
 const rpcUrl = () => $("rpc").value.trim();
@@ -90,44 +93,39 @@ async function rpc(method, params = []) {
   return j.result;
 }
 
-// --- tiny SCALE reader -------------------------------------------------------
+const bytesToHex = (b) => "0x" + [...b].map(x => x.toString(16).padStart(2, "0")).join("");
 function hexToBytes(h) { h = h.replace(/^0x/, ""); const b = new Uint8Array(h.length / 2);
   for (let i = 0; i < b.length; i++) b[i] = parseInt(h.substr(i * 2, 2), 16); return b; }
-const bytesToHex = (b) => "0x" + [...b].map(x => x.toString(16).padStart(2, "0")).join("");
-class Reader { constructor(b) { this.b = b; this.i = 0; }
-  u8() { return this.b[this.i++]; }
-  u32() { let v = 0; for (let k = 3; k >= 0; k--) v = v * 256 + this.b[this.i + k]; this.i += 4; return v; }
-  u64() { const lo = this.u32(), hi = this.u32(); return hi * 4294967296 + lo; }
-  bytes(n) { const s = this.b.slice(this.i, this.i + n); this.i += n; return s; }
-  compact() { const m = this.b[this.i] & 3;
-    if (m === 0) return this.u8() >> 2;
-    if (m === 1) { const v = (this.b[this.i] | this.b[this.i + 1] << 8) >> 2; this.i += 2; return v; }
-    if (m === 2) return this.u32() >>> 2;
-    throw new Error("big compact"); }
-  bool() { return this.u8() === 1; }
-  option(f) { return this.u8() === 1 ? f() : null; } }
-const u64le = (n) => { const b = new Uint8Array(8); let v = BigInt(n);
-  for (let i = 0; i < 8; i++) { b[i] = Number(v & 255n); v >>= 8n; } return bytesToHex(b); };
-
-// --- registry lookups --------------------------------------------------------
-async function lookup(hashHex) {
-  const v = await rpc("state_call", ["NotarialRuntimeApi_verify_document", hashHex]);
-  const r = new Reader(hexToBytes(v));
-  const hit = r.option(() => ({ id: r.u64(), block: r.u32(), status: r.u8(), certified: r.bool(), witnesses: r.u32() }));
-  if (!hit) return null;
-  const a = await rpc("state_call", ["NotarialRuntimeApi_get_attestation", u64le(hit.id)]);
-  const q = new Reader(hexToBytes(a));
-  const det = q.option(() => ({ id: q.u64(), hash: bytesToHex(q.bytes(32)), category: q.u8(),
-    label: new TextDecoder().decode(q.bytes(q.compact())), author: bytesToHex(q.bytes(32)),
-    block: q.u32(), expires: q.option(() => q.u32()), status: q.u8(), witnesses: q.u32(), certified: q.bool() }));
-  return { ...hit, ...det };
+function compactAt(b, i) {   // SCALE compact integer at b[i]: [value, next index]
+  const m = b[i] & 3;
+  if (m === 0) return [b[i] >> 2, i + 1];
+  if (m === 1) return [(b[i] | b[i + 1] << 8) >> 2, i + 2];
+  if (m === 2) return [((b[i] | b[i + 1] << 8 | b[i + 2] << 16) + b[i + 3] * 16777216) / 4, i + 4];
+  const n = (b[i] >> 2) + 4; let v = 0;
+  for (let k = n - 1; k >= 0; k--) v = v * 256 + b[i + 1 + k];
+  return [v, i + 1 + n];
 }
 
-async function whenRecorded(block) {
-  try {   // exact time, if this node still holds that block's state
-    const h = await rpc("chain_getBlockHash", [block]);
-    const t = await rpc("state_getStorage", [TIMESTAMP_NOW_KEY, h]);
-    if (t) { const ms = new Reader(hexToBytes(t)).u64(); return { date: new Date(ms), exact: true }; }
+// --- registry lookups (node RPC methods, open on the public gateway too) ----
+async function lookup(hashHex) {
+  const n = await rpc("quantumharmony_getNotarization", [hashHex]);
+  if (!n) return null;
+  const a = await rpc("notarial_getAttestation", [n.attestationId]);
+  return { id: n.attestationId, block: n.blockNumber, blockHash: n.blockHash, status: a.status,
+           label: a.description, category: a.category, author: a.attester };
+}
+
+// The block's first extrinsic is Timestamp::set(now): read the time from it.
+async function whenRecorded(block, blockHash) {
+  try {
+    const h = blockHash || await rpc("chain_getBlockHash", [block]);
+    const ext = hexToBytes((await rpc("chain_getBlock", [h])).block.extrinsics[0]);
+    let [, i] = compactAt(ext, 0);            // length prefix
+    i += 1;                                   // extrinsic version byte
+    if (ext[i] === 1 && ext[i + 1] === 0) {   // Timestamp (pallet 1), set (call 0)
+      const [ms] = compactAt(ext, i + 2);
+      if (ms > 1.6e12 && ms < 4e12) return { date: new Date(ms), exact: true };
+    }
   } catch (_) {}
   const best = parseInt((await rpc("chain_getHeader")).number, 16);
   return { date: new Date(Date.now() - (best - block) * BLOCK_SECONDS * 1000), exact: false };
@@ -149,20 +147,20 @@ async function check(hashHex, fileName) {
     if (!rec) return show("no", `<h2>Aucune inscription pour ce fichier exact</h2>
       <dl>${what}<dt>Empreinte</dt><dd class="mono">${hashHex}</dd></dl>
       <p>Un seul caractère modifié donne une autre empreinte. Si le document a été inscrit, c'est une autre version.</p>`);
-    const when = await whenRecorded(rec.block);
-    const who = AUTHORS[rec.author] || `compte ${rec.author.slice(0, 10)}…${rec.author.slice(-6)}`;
-    show("ok", `<h2>✅ Inscrit au registre <span class="pill">${STATUS[rec.status] || rec.status}</span></h2>
+    const when = await whenRecorded(rec.block, rec.blockHash);
+    const who = AUTHORS[rec.author] || `compte ${rec.author.slice(0, 8)}…${rec.author.slice(-6)}`;
+    show("ok", `<h2>✅ Inscrit au registre <span class="pill">${escapeHtml(STATUS[rec.status] || rec.status)}</span></h2>
       <dl>${what}
         <dt>Par</dt><dd>${escapeHtml(who)}</dd>
         <dt>Le</dt><dd>${when.exact ? "" : "vers le "}${fmt(when.date)}</dd>
         <dt>Bloc</dt><dd>n° ${rec.block.toLocaleString("fr-CA")}</dd>
-        <dt>Libellé</dt><dd>${escapeHtml(rec.label || "—")} · ${CATEGORY[rec.category] || "catégorie " + rec.category}</dd>
+        <dt>Libellé</dt><dd>${escapeHtml(rec.label || "—")} · ${escapeHtml(CATEGORY[rec.category] || rec.category)}</dd>
         <dt>Inscription</dt><dd>n° ${rec.id}</dd>
         <dt>Empreinte</dt><dd class="mono">${hashHex}</dd>
       </dl>`);
   } catch (e) {
-    show("err", `<h2>Le nœud ne répond pas</h2><p>${escapeHtml(e.message)}</p>
-      <p>Vérifiez que votre nœud tourne (<code>./verify.sh --status</code>) et l'adresse ci-dessous.</p>`);
+    show("err", `<h2>Le registre ne répond pas</h2><p>${escapeHtml(e.message)}</p>
+      <p>${PUBLIC_SITE ? "Réessayez dans un instant." : "Vérifiez que votre nœud tourne (<code>./verify.sh --status</code>) et l'adresse ci-dessous."}</p>`);
   }
 }
 const escapeHtml = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -189,6 +187,8 @@ async function nodeStatus() {
       (s.isSyncing ? ", synchronisation en cours (les inscriptions récentes peuvent manquer)" : ", à jour");
   } catch (e) { $("status").textContent = "Pas de réponse du nœud à cette adresse."; }
 }
+$("rpc").value = DEFAULT_RPC;
+if (PUBLIC_SITE) $("rpclabel").textContent = "Registre interrogé : passerelle publique de Paraxiom, en lecture seule. Avec votre propre nœud, c'est votre copie qui répond :";
 $("rpc").addEventListener("change", nodeStatus);
 nodeStatus();
 const q = new URLSearchParams(location.search).get("h");
