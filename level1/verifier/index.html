@@ -4,47 +4,63 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vérifier un document</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
-  :root { --bg:#f7f7f4; --card:#ffffff; --ink:#1d2228; --muted:#5c6670; --line:#d9dcd6;
-          --ok:#1f7a4d; --ok-bg:#e7f4ec; --no:#9a3b1e; --no-bg:#fbece6; --accent:#24527a; }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --bg:#15181b; --card:#1d2125; --ink:#e7e9ea; --muted:#9aa3ab;
-      --line:#2e3439; --ok:#5fc48f; --ok-bg:#14291e; --no:#f09a7c; --no-bg:#2c1a14; --accent:#7fb0dc; }
-  }
+  :root { --paper:#F7F8F6; --doc:#FFFFFF; --ink:#1B2430; --ink-soft:#46525E; --meta:#6B7680; --rule:#D5DAD6;
+          --green:#2F5D50; --green-soft:#E6EEEA; --seal:#B8412E; --seal-soft:#F6E7E3; --focus:#2F5D50;
+          --display:"Libre Caslon Text", Georgia, serif; --body:"Public Sans", -apple-system, "Segoe UI", sans-serif;
+          --mono:ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --paper:#14191F; --doc:#1B2129; --ink:#E6E8E3; --ink-soft:#B5BBC2; --meta:#8A939C; --rule:#2C343D;
+    --green:#6FA893; --green-soft:#1C2A26; --seal:#D9705F; --seal-soft:#2E1F1C; --focus:#6FA893; } }
+  :root[data-theme="dark"] { --paper:#14191F; --doc:#1B2129; --ink:#E6E8E3; --ink-soft:#B5BBC2; --meta:#8A939C;
+    --rule:#2C343D; --green:#6FA893; --green-soft:#1C2A26; --seal:#D9705F; --seal-soft:#2E1F1C; --focus:#6FA893; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink);
-         font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
-  main { max-width:640px; margin:0 auto; padding:32px 16px 48px; }
-  h1 { font-size:1.6rem; margin:0 0 4px; }
-  .sub { color:var(--muted); margin:0 0 24px; }
-  .drop { display:block; border:2px dashed var(--line); border-radius:12px; background:var(--card);
-          padding:40px 16px; text-align:center; cursor:pointer; transition:border-color .15s; }
-  .drop.over, .drop:hover { border-color:var(--accent); }
-  .drop strong { display:block; font-size:1.1rem; }
-  .drop span { color:var(--muted); font-size:.9rem; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:17px/1.6 var(--body); -webkit-font-smoothing:antialiased; }
+  :focus-visible { outline:2px solid var(--focus); outline-offset:3px; }
+  a { color:var(--green); }
+  main { max-width:72ch; margin:0 auto; padding:0 16px 64px; }
+  .masthead { display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:28px 0 18px;
+              border-bottom:1px solid var(--rule); flex-wrap:wrap; margin-bottom:40px; }
+  .masthead .name { font-family:var(--display); font-size:1.05rem; }
+  .masthead .name span { color:var(--meta); font-style:italic; }
+  .label { font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--seal); font-weight:500; }
+  h1 { font-family:var(--display); font-weight:400; font-size:clamp(1.9rem,5vw,2.6rem); line-height:1.15; margin:0 0 10px; }
+  .sub { color:var(--ink-soft); margin:0 0 28px; }
+  .drop { display:block; border:2px dashed var(--rule); border-radius:10px; background:var(--doc);
+          padding:44px 16px; text-align:center; cursor:pointer; transition:border-color .15s; }
+  .drop.over, .drop:hover { border-color:var(--green); }
+  .drop strong { display:block; font-family:var(--display); font-weight:400; font-size:1.3rem; }
+  .drop span { color:var(--meta); font-size:.9rem; }
   input[type=file] { display:none; }
   .row { display:flex; gap:8px; margin-top:12px; }
-  .row input { flex:1; min-width:0; padding:10px 12px; border:1px solid var(--line); border-radius:8px;
-               background:var(--card); color:var(--ink); font:14px ui-monospace,Menlo,monospace; }
-  button { padding:10px 16px; border:0; border-radius:8px; background:var(--accent); color:#fff;
-           font-weight:600; cursor:pointer; }
-  .result { margin-top:24px; border-radius:12px; padding:20px; display:none; }
-  .result.ok { display:block; background:var(--ok-bg); border:1px solid var(--ok); }
-  .result.no { display:block; background:var(--no-bg); border:1px solid var(--no); }
-  .result.err { display:block; background:var(--card); border:1px solid var(--line); }
-  .result h2 { margin:0 0 12px; font-size:1.2rem; }
-  .ok h2 { color:var(--ok); } .no h2 { color:var(--no); }
+  .row input { flex:1; min-width:0; padding:10px 12px; border:1px solid var(--rule); border-radius:8px;
+               background:var(--doc); color:var(--ink); font:14px var(--mono); }
+  button { padding:10px 18px; border:0; border-radius:8px; background:var(--green); color:var(--doc);
+           font:600 15px var(--body); cursor:pointer; }
+  .samples { margin-top:14px; font-size:.9rem; color:var(--meta); }
+  .result { margin-top:28px; border-radius:10px; padding:20px 22px; display:none; }
+  .result.ok { display:block; background:var(--green-soft); border:1px solid var(--green); }
+  .result.no { display:block; background:var(--seal-soft); border:1px solid var(--seal); }
+  .result.err { display:block; background:var(--doc); border:1px solid var(--rule); }
+  .result h2 { margin:0 0 12px; font-family:var(--display); font-weight:400; font-size:1.35rem; }
+  .ok h2 { color:var(--green); } .no h2 { color:var(--seal); }
   dl { margin:0; display:grid; grid-template-columns:max-content 1fr; gap:4px 16px; }
-  dt { color:var(--muted); } dd { margin:0; overflow-wrap:anywhere; }
-  .mono { font-family:ui-monospace,Menlo,monospace; font-size:.85rem; }
-  .node { margin-top:32px; color:var(--muted); font-size:.85rem; }
-  .node input { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px;
-                background:var(--card); color:var(--ink); font:13px ui-monospace,Menlo,monospace; }
-  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font-size:.8rem; border:1px solid currentColor; }
+  dt { color:var(--meta); } dd { margin:0; overflow-wrap:anywhere; }
+  .mono { font-family:var(--mono); font-size:.85rem; }
+  .node { margin-top:40px; color:var(--meta); font-size:.85rem; }
+  .node input { width:100%; padding:6px 8px; border:1px solid var(--rule); border-radius:6px;
+                background:var(--doc); color:var(--ink); font:13px var(--mono); }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font:500 .75rem var(--body);
+          letter-spacing:.06em; text-transform:uppercase; border:1px solid currentColor; vertical-align:middle; }
 </style>
 </head>
 <body>
 <main>
+  <header class="masthead">
+    <div class="name" style="display:flex;align-items:center;gap:12px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 1332" width="32" height="26" role="img" aria-label="Paraxiom" style="flex:none;color:var(--ink)"><g fill="currentColor"><circle cx="160" cy="160" r="160"/><circle cx="160" cy="666" r="160"/><circle cx="160" cy="1172" r="160"/><path fill-rule="evenodd" d="M 320,666 a 660,660 0 1,0 1320,0 a 660,660 0 1,0 -1320,0 Z M 632,666 a 348,348 0 1,0 696,0 a 348,348 0 1,0 -696,0 Z M 1328,666 a 144,144 0 1,0 288,0 a 144,144 0 1,0 -288,0 Z"/></g></svg><span style="color:inherit;font-style:normal">Paraxiom</span> <span>Registre québécois</span></div>
+    <div class="label">Vérifier</div>
+  </header>
   <h1>Vérifier un document</h1>
   <p class="sub">Déposez un fichier. Son empreinte est calculée sur votre appareil ; le fichier n'est envoyé nulle part.
      Le registre dit s'il a été inscrit, par qui et quand.</p>
@@ -59,6 +75,8 @@
     <input id="hash" placeholder="ou collez une empreinte (64 caractères hexadécimaux)" spellcheck="false">
     <button id="go">Vérifier</button>
   </div>
+
+  <p class="samples">Pour essayer : <a href="exemples/proces-verbal-exemple.txt" download>procès-verbal d'exemple</a> (inscrit) et <a href="exemples/proces-verbal-exemple-modifie.txt" download>la même chose, un montant changé</a> (non inscrit).</p>
 
   <section class="result" id="result" aria-live="polite"></section>
 
