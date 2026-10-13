@@ -7,7 +7,7 @@
 # copy holder exists to notice.
 #
 #   ./verify.sh              compares and exits 0 if equal, 1 otherwise
-#   ./verify.sh --status     also prints sync state and peers
+#   ./verify.sh --status     also prints sync state and health (with the peer count)
 #
 # Exit codes: 0 agrees, 1 divergence at a height, 2 not even the same chain.
 
@@ -56,7 +56,8 @@ printf 'public hash at #%s: %s\n' "$local_num" "$remote_hash"
 if [ "${1:-}" = "--status" ]; then
   echo "sync:   $(rpc "$LOCAL" system_syncState | field)"
   echo "health: $(rpc "$LOCAL" system_health | field)"
-  echo "peers:  $(rpc "$LOCAL" system_peers | python3 -c 'import json,sys;print(", ".join(p["peerId"][:16]+"… "+p["roles"] for p in json.load(sys.stdin)["result"]))')"
+  # No peer list: system_peers is an unsafe RPC method, and this node answers safe methods
+  # only, so it printed a Python traceback here (2026-10-13). health carries the count.
 fi
 
 if [ "$local_head" = "$remote_hash" ]; then

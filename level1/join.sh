@@ -147,13 +147,16 @@ start_only
 
 say "     checking the genesis this node actually built"
 LOCAL_RPC="${QH_LOCAL_RPC:-http://127.0.0.1:9944}"
+# "|| true": while the node is still opening its database, curl gets "connection refused";
+# with pipefail that failure reached set -e and ended the script silently, before any
+# check (seen on 2026-10-12, first install on a test machine: no line after this one).
 for _ in $(seq 1 60); do
   g=$(curl -s -m 3 -H 'Content-Type: application/json' \
         -d '{"jsonrpc":"2.0","id":1,"method":"chain_getBlockHash","params":[0]}' \
         "$LOCAL_RPC" 2>/dev/null \
       | python3 -c 'import json,sys
 try: print(json.load(sys.stdin)["result"])
-except Exception: pass' 2>/dev/null)
+except Exception: pass' 2>/dev/null) || true
   [ -n "$g" ] && break
   sleep 2
 done

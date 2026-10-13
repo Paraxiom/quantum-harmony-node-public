@@ -51,7 +51,7 @@ Inscrire vos propres documents se fera avec le rapporteur, en développement.
 
 ## État réel du réseau, octobre 2026
 
-Réseau d'essai. Trois validateurs, tous exploités par Paraxiom, plus un nœud de niveau 1 à l'Université Carleton depuis août. La version 47 du runtime est en service depuis le 6 octobre. Un correctif de finalisation a été déployé le 22 septembre et n'a pas encore été testé de façon indépendante. Un nouveau nœud ne peut pas encore se synchroniser depuis le bloc de genèse, d'où le départ sur un instantané signé. Le transport entre validateurs est classique aujourd'hui ; le relais post-quantique n'est pas encore en service. Six divergences de chaîne sont survenues en 2026, chacune diagnostiquée. Rien de cela ne change ce qu'est un nœud de niveau 1 : une copie vérifiée, et un témoin.
+Réseau d'essai. Trois validateurs, tous exploités par Paraxiom, plus un nœud de niveau 1 à l'Université Carleton depuis août. La version 51 du runtime est en service depuis le 9 octobre. Un correctif de finalisation a été déployé le 22 septembre et n'a pas encore été testé de façon indépendante. Un nouveau nœud ne peut pas encore se synchroniser depuis le bloc de genèse, d'où le départ sur un instantané signé. Le transport entre validateurs est classique aujourd'hui ; le relais post-quantique n'est pas encore en service. Six divergences de chaîne sont survenues en 2026, chacune diagnostiquée. Rien de cela ne change ce qu'est un nœud de niveau 1 : une copie vérifiée, et un témoin.
 
 ## Niveau 2, plus tard
 

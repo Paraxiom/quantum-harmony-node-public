@@ -51,7 +51,7 @@ Recording your own documents will be done by the reporter, in development.
 
 ## Honest state of the network, October 2026
 
-Test network. Three validators, all operated by Paraxiom, plus one level 1 node at Carleton University since August. Runtime version 47 has been live since 6 October. A finality correction was deployed on 22 September and has not yet been independently tested. A new node cannot yet synchronize from the genesis block, which is why you start from a signed snapshot. Validator to validator transport is classical today; the post quantum relay is not yet in service. Six chain divergences occurred in 2026, each diagnosed. None of this changes what a level 1 node is: a verified copy, and a witness.
+Test network. Three validators, all operated by Paraxiom, plus one level 1 node at Carleton University since August. Runtime version 51 has been live since 9 October. A finality correction was deployed on 22 September and has not yet been independently tested. A new node cannot yet synchronize from the genesis block, which is why you start from a signed snapshot. Validator to validator transport is classical today; the post quantum relay is not yet in service. Six chain divergences occurred in 2026, each diagnosed. None of this changes what a level 1 node is: a verified copy, and a witness.
 
 ## Level 2, later
 

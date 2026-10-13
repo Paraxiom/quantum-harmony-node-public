@@ -31,6 +31,12 @@ services:
       # Blocks and finality votes are still signed with SPHINCS+ either way.
       DISABLE_PQC_TRANSPORT: "1"
       DISABLE_QUANTUM_P2P: "1"
+    # The image's /entrypoint.sh builds its own arguments from environment variables and
+    # ignores the command below. Measured 2026-10-13 on a test install: the node ran with
+    # "--name QuantumHarmony --rpc-cors all --prometheus-external" and none of these lines
+    # (NODE_NAME, --no-telemetry, --no-mdns, the bootnodes). For a node without keys that
+    # script only adds the arguments and then execs this binary, so start it directly.
+    entrypoint: ["/usr/local/bin/quantumharmony-node"]
     command:
       - "--chain=/config/chainspec.json"
       - "--base-path=/data"
