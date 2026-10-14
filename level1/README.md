@@ -12,7 +12,7 @@ A level 1 node is a complete copy of the QuantumHarmony public registry on your 
 - Linux with Docker and Docker Compose v2 (`docker compose version`). Also `curl`, `gpg`, `python3`.
 - On Windows, use a Linux virtual machine (Hyper-V, VMware or a cloud provider). WSL2 with Docker Desktop should also work, but it has not been tested yet.
 - Outbound TCP to port 30333 of the three validators (51.79.26.123, 51.79.26.168, 209.38.225.4). No inbound port. No firewall change.
-- About 30 minutes, most of it the download.
+- About 2 h 15 in all, measured on a test machine on a home connection on 12 October 2026: 1 h 04 to download the snapshot, 31 min to check it against the signed checksum, 38 min to extract it. Most of it runs on its own.
 
 ## Steps
 
@@ -37,7 +37,7 @@ Once your node is up to date:
 
 The "Vérifier un document" page opens in your browser. Drop a file: its fingerprint is computed on your machine, the file goes nowhere, and your own node answers whether it was recorded, by whom and when.
 
-To try it: drop `verifier/exemples/proces-verbal-exemple.txt`, recorded by Paraxiom (demonstration). The page says "Inscrit". Then drop `proces-verbal-exemple-modifie.txt`, where one amount differs: "Aucune inscription pour ce fichier exact". The registry keeps each document's fingerprint with a short technical label, never its content.
+To try it: drop `verifier/exemples/proces-verbal-exemple.txt`, recorded by Paraxiom (demonstration). The page says "Inscrit". Then drop `proces-verbal-exemple-modifie.txt`, where one amount differs: "Aucune inscription pour ce fichier exact". The registry keeps each document's fingerprint, with a short technical label, not the document itself.
 
 Recording your own documents will be done by the reporter, in development.
 

@@ -12,7 +12,7 @@ Un nœud de niveau 1 est une copie complète du registre public QuantumHarmony, 
 - Linux avec Docker et Docker Compose v2 (`docker compose version`). Aussi `curl`, `gpg`, `python3`.
 - Sous Windows, utilisez une machine virtuelle Linux (Hyper-V, VMware ou un fournisseur infonuagique). WSL2 avec Docker Desktop devrait aussi fonctionner, mais n'a pas encore été testé.
 - Des connexions sortantes en TCP vers le port 30333 des trois validateurs (51.79.26.123, 51.79.26.168, 209.38.225.4). Aucun port entrant. Aucune modification de pare-feu.
-- Une trentaine de minutes, surtout du téléchargement.
+- Environ 2 h 15 en tout, mesuré sur une machine d'essai avec une connexion résidentielle le 12 octobre 2026 : 1 h 04 pour télécharger l'instantané, 31 min pour le vérifier avec la somme de contrôle signée, 38 min pour l'extraire. Presque tout se fait sans vous.
 
 ## Étapes
 
@@ -37,7 +37,7 @@ Une fois le nœud à jour :
 
 La page « Vérifier un document » s'ouvre dans votre navigateur. Déposez un fichier : son empreinte est calculée sur votre appareil, le fichier n'est envoyé nulle part, et c'est votre propre nœud qui répond s'il a été inscrit, par qui et quand.
 
-Pour essayer : déposez `verifier/exemples/proces-verbal-exemple.txt`, inscrit par Paraxiom (démonstration). La page répond « Inscrit ». Déposez ensuite `proces-verbal-exemple-modifie.txt`, où un seul montant diffère : « Aucune inscription pour ce fichier exact ». Le registre ne garde que l'empreinte de chaque document, avec un court libellé technique, jamais son contenu.
+Pour essayer : déposez `verifier/exemples/proces-verbal-exemple.txt`, inscrit par Paraxiom (démonstration). La page répond « Inscrit ». Déposez ensuite `proces-verbal-exemple-modifie.txt`, où un seul montant diffère : « Aucune inscription pour ce fichier exact ». Le registre garde l'empreinte de chaque document, avec un court libellé technique, pas le document lui-même.
 
 Inscrire vos propres documents se fera avec le rapporteur, en développement.
 
