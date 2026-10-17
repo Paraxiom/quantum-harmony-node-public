@@ -68,4 +68,4 @@ docker volume rm level1_qh-level1-data             # remove the data (irreversib
 ## Contact
 
 Sylvain Cormier, Paraxiom Technologies inc., sylvain@paraxiom.org, 514 804-8434.
-Public read gateway used by `verify.sh`: https://validateurs.paraxiom.org/rpc. Live state page: https://validateurs.paraxiom.org/demo.
+Public read gateway used by `verify.sh`: https://validateurs.paraxiom.org/rpc.

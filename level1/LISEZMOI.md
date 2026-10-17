@@ -68,4 +68,4 @@ docker volume rm level1_qh-level1-data             # effacer les données (irré
 ## Contact
 
 Sylvain Cormier, Paraxiom Technologies inc., sylvain@paraxiom.org, 514 804-8434.
-Passerelle publique de lecture utilisée par `verify.sh` : https://validateurs.paraxiom.org/rpc. Page d'état en direct : https://validateurs.paraxiom.org/demo.
+Passerelle publique de lecture utilisée par `verify.sh` : https://validateurs.paraxiom.org/rpc.
