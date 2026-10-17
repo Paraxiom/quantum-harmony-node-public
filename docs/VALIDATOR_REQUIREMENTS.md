@@ -39,7 +39,7 @@
 - **Minimum**: 
   - 4 CPU cores
   - 8GB RAM
-  - 100GB SSD
+  - 500GB SSD (the chain was about 116 GB on 2 October 2026 and grows about 1.3 GB a day)
 - **Recommended Cloud Options**:
   - OVH B2-15: ~$30/month
   - DigitalOcean/Linode/Vultr: ~$48/month

@@ -2,7 +2,7 @@
 
 Version française : [LISEZMOI.md](LISEZMOI.md)
 
-A level 1 node is a complete copy of the QuantumHarmony public registry on your own machine, on your own network. It verifies every block and every signature it receives. It signs nothing, holds no keys that matter, earns nothing, and costs nothing beyond the machine. Its purpose is that the registry is not kept by one party: if an entry is altered anywhere, your copy stops matching, and `verify.sh` says so.
+A level 1 node is a complete copy of the QuantumHarmony public registry on your own machine, on your own network. It verifies every new block it receives. It signs nothing, holds no validator key, earns nothing, and costs nothing beyond the machine. Its purpose is that the registry is not kept by one party. `verify.sh` compares your last finalized block with the public gateway's.
 
 ## What you need
 
@@ -35,27 +35,27 @@ Once your node is up to date:
 ./verifier.sh
 ```
 
-The "Vérifier un document" page opens in your browser. Drop a file: its fingerprint is computed on your machine, the file goes nowhere, and your own node answers whether it was recorded, by whom and when.
+The "Vérifier un document" page opens in your browser. Drop a file: its fingerprint is computed on your machine, the file goes nowhere, and your own node answers whether it was recorded, by which account, and when.
 
-To try it: drop `verifier/exemples/proces-verbal-exemple.txt`, recorded by Paraxiom (demonstration). The page says "Inscrit". Then drop `proces-verbal-exemple-modifie.txt`, where one amount differs: "Aucune inscription pour ce fichier exact". The registry keeps each document's fingerprint, with a short technical label, not the document itself.
+To try it: drop `verifier/exemples/proces-verbal-exemple.txt`, recorded by Paraxiom (demonstration). The page says "Inscrit". Then drop `proces-verbal-exemple-modifie.txt`, where one amount differs: "Aucune inscription pour ce fichier exact". The registry keeps each document's fingerprint, with a short label, not the document itself.
 
-Recording your own documents will be done by the reporter, in development.
+Recording your own documents would be done with the reporter, a tool in development.
 
 ## What the node does and does not do
 
-- It keeps a full copy and verifies SPHINCS+ block seals, SPHINCS+ finality votes and Falcon-512 entry signatures.
-- It does not produce blocks, does not vote, has no validator key, no token, no account. There is nothing to steal on it.
+- It keeps a full copy and verifies SPHINCS+ block seals and SPHINCS+ finality votes. The Falcon-512 signatures on entries are stored, not verified.
+- It does not produce blocks, does not vote, has no validator key and no account. There is nothing to steal on it.
 - Its RPC answers on 127.0.0.1:9944 only, safe methods only. Nothing is exposed to the internet.
-- It writes no personal data: the registry carries fingerprints of documents with a short technical label, not the documents.
+- The registry carries fingerprints of documents with a short label, not the documents. No personal data is recorded in it today, but the label is free text: the chain does not enforce it.
 - It sends no telemetry.
 
 ## Honest state of the network, October 2026
 
-Test network. Three validators, all operated by Paraxiom, plus one level 1 node at Carleton University since August. Runtime version 51 has been live since 9 October. A finality correction was deployed on 22 September and has not yet been independently tested. A new node cannot yet synchronize from the genesis block, which is why you start from a signed snapshot. Validator to validator transport is classical today; the post quantum relay is not yet in service. Six chain divergences occurred in 2026, each diagnosed. None of this changes what a level 1 node is: a verified copy, and a witness.
+Test network. Three validators, all operated by Paraxiom. Runtime version 51 has been live since 9 October. A finality correction was deployed on 22 September and has not yet been independently tested. A new node cannot yet synchronize from the genesis block, which is why you start from a signed snapshot. Validator to validator transport is classical today; the post quantum relay is not yet in service. Six chain divergences occurred in 2026, each diagnosed. None of this changes what a level 1 node is: a verified copy, and a witness.
 
 ## Level 2, later
 
-A validator seat (co-signing blocks and finality) is offered by cohort once validator registration is fully gated by the runtime and the fourth validator has run for a quarter. Holding a level 1 node is the precondition.
+A validator seat (co-signing blocks and finality) could be offered by cohort, once validator registration is fully gated by the runtime and the fourth validator has run for a quarter. Holding a level 1 node would be the precondition.
 
 ## Stop, update, remove
 

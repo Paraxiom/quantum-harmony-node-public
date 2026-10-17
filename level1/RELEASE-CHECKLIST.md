@@ -2,7 +2,7 @@
 
 ## 0. ✅ DONE 2026-09-30 — the correct chainspec is published
 
-Served at `https://paraxiom.org/chainspec.json` and `https://validateurs.paraxiom.org/join/quantumharmony-chainspec.json`, sha256 `4f468f15…`. Verified before publishing: its `genesis` section is identical to the chainspec the live Carleton node runs on (genesis `0x67a63ee1…`), and its three bootnode ids match `system_localPeerId` on Alice and Bob and Alice's view of Charlie. The previous file is kept on Alice as `/var/www/paraxiom-public/chainspec.json.bak-2026-09-30-v37`. What follows is the record of the problem.
+Served at `https://paraxiom.org/chainspec.json` and `https://validateurs.paraxiom.org/join/quantumharmony-chainspec.json`, sha256 `4f468f15…`. Verified before publishing: its `genesis` section is identical to the chainspec a live level 1 node run by Paraxiom runs on (genesis `0x67a63ee1…`), and its three bootnode ids match `system_localPeerId` on Alice and Bob and Alice's view of Charlie. The previous file is kept on Alice as `/var/www/paraxiom-public/chainspec.json.bak-2026-09-30-v37`. What follows is the record of the problem.
 
 ### (history) PUBLISH THE CORRECT CHAINSPEC
 

@@ -2,10 +2,10 @@
 
 ## Operator Participation Guidelines (Non-Legal)
 
-**Status:** Production Testnet (Alpha)
+**Status:** Testnet (Alpha)
 **Scope:** Infrastructure validation only — no economic finality
 
-These guidelines define expectations for operators participating in the QuantumHarmony production testnet. This is not a legal contract, but a shared understanding to ensure the testnet remains stable, credible, and useful for research and engineering.
+These guidelines define expectations for operators participating in the QuantumHarmony testnet. This is not a legal contract, but a shared understanding to ensure the testnet remains stable, credible, and useful for research and engineering.
 
 ---
 
@@ -18,7 +18,7 @@ The QuantumHarmony testnet exists to validate:
 - Experimental coherence-based validator selection
 - Operational behavior under realistic network conditions
 
-There are no tokens, rewards, or economic guarantees at this stage.
+There are no rewards or economic guarantees at this stage. QMHY, the test network's unit for transaction fees, has no value and is not sold.
 
 ---
 

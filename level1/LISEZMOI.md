@@ -2,7 +2,7 @@
 
 English version: [README.md](README.md)
 
-Un nœud de niveau 1 est une copie complète du registre public QuantumHarmony, sur votre machine, dans votre réseau. Il vérifie chaque bloc et chaque signature qu'il reçoit. Il ne signe rien, ne détient aucune clé qui compte, ne rapporte rien et ne coûte rien de plus que la machine. Sa raison d'être : que le registre ne soit pas gardé par une seule partie. Si une inscription est modifiée quelque part, votre copie cesse de concorder, et `verify.sh` le dit.
+Un nœud de niveau 1 est une copie complète du registre public QuantumHarmony, sur votre machine, dans votre réseau. Il vérifie chaque nouveau bloc qu'il reçoit. Il ne signe rien, ne détient aucune clé de validateur, ne rapporte rien et ne coûte rien de plus que la machine. Sa raison d'être : que le registre ne soit pas gardé par une seule partie. `verify.sh` compare votre dernier bloc finalisé à celui de la passerelle publique.
 
 ## Ce qu'il vous faut
 
@@ -35,27 +35,27 @@ Une fois le nœud à jour :
 ./verifier.sh
 ```
 
-La page « Vérifier un document » s'ouvre dans votre navigateur. Déposez un fichier : son empreinte est calculée sur votre appareil, le fichier n'est envoyé nulle part, et c'est votre propre nœud qui répond s'il a été inscrit, par qui et quand.
+La page « Vérifier un document » s'ouvre dans votre navigateur. Déposez un fichier : son empreinte est calculée sur votre appareil, le fichier n'est envoyé nulle part, et c'est votre propre nœud qui répond s'il a été inscrit, par quel compte, et quand.
 
-Pour essayer : déposez `verifier/exemples/proces-verbal-exemple.txt`, inscrit par Paraxiom (démonstration). La page répond « Inscrit ». Déposez ensuite `proces-verbal-exemple-modifie.txt`, où un seul montant diffère : « Aucune inscription pour ce fichier exact ». Le registre garde l'empreinte de chaque document, avec un court libellé technique, pas le document lui-même.
+Pour essayer : déposez `verifier/exemples/proces-verbal-exemple.txt`, inscrit par Paraxiom (démonstration). La page répond « Inscrit ». Déposez ensuite `proces-verbal-exemple-modifie.txt`, où un seul montant diffère : « Aucune inscription pour ce fichier exact ». Le registre garde l'empreinte de chaque document, avec un court libellé, pas le document lui-même.
 
-Inscrire vos propres documents se fera avec le rapporteur, en développement.
+Inscrire vos propres documents se ferait avec le rapporteur, un outil en développement.
 
 ## Ce que le nœud fait et ne fait pas
 
-- Il garde une copie complète et vérifie les sceaux de blocs SPHINCS+, les votes de finalité SPHINCS+ et les signatures d'inscription Falcon-512.
-- Il ne produit pas de blocs, ne vote pas, n'a ni clé de validateur, ni jeton, ni compte. Il n'y a rien à voler dessus.
+- Il garde une copie complète et vérifie les sceaux de blocs SPHINCS+ et les votes de finalité SPHINCS+. Les signatures Falcon-512 des inscriptions sont stockées, pas vérifiées.
+- Il ne produit pas de blocs, ne vote pas, n'a ni clé de validateur, ni compte. Il n'y a rien à voler dessus.
 - Son RPC répond sur 127.0.0.1:9944 seulement, méthodes sûres seulement. Rien n'est exposé à Internet.
-- Il n'écrit aucun renseignement personnel : le registre porte des empreintes de documents avec un court libellé technique, pas les documents.
+- Le registre porte des empreintes de documents avec un court libellé, pas les documents. Aucune donnée personnelle n'y est inscrite aujourd'hui, mais le libellé est du texte libre : la chaîne ne l'impose pas.
 - Il n'envoie aucune télémétrie.
 
 ## État réel du réseau, octobre 2026
 
-Réseau d'essai. Trois validateurs, tous exploités par Paraxiom, plus un nœud de niveau 1 à l'Université Carleton depuis août. La version 51 du runtime est en service depuis le 9 octobre. Un correctif de finalisation a été déployé le 22 septembre et n'a pas encore été testé de façon indépendante. Un nouveau nœud ne peut pas encore se synchroniser depuis le bloc de genèse, d'où le départ sur un instantané signé. Le transport entre validateurs est classique aujourd'hui ; le relais post-quantique n'est pas encore en service. Six divergences de chaîne sont survenues en 2026, chacune diagnostiquée. Rien de cela ne change ce qu'est un nœud de niveau 1 : une copie vérifiée, et un témoin.
+Réseau d'essai. Trois validateurs, tous exploités par Paraxiom. La version 51 du runtime est en service depuis le 9 octobre. Un correctif de finalisation a été déployé le 22 septembre et n'a pas encore été testé de façon indépendante. Un nouveau nœud ne peut pas encore se synchroniser depuis le bloc de genèse, d'où le départ sur un instantané signé. Le transport entre validateurs est classique aujourd'hui ; le relais post-quantique n'est pas encore en service. Six divergences de chaîne sont survenues en 2026, chacune diagnostiquée. Rien de cela ne change ce qu'est un nœud de niveau 1 : une copie vérifiée, et un témoin.
 
 ## Niveau 2, plus tard
 
-Un siège de validateur (cosigner les blocs et la finalité) est offert par cohorte une fois l'inscription des validateurs entièrement verrouillée par le runtime et le quatrième validateur en service depuis un trimestre. Héberger un nœud de niveau 1 est le préalable.
+Un siège de validateur (cosigner les blocs et la finalité) pourrait être proposé par cohorte, une fois l'inscription des validateurs entièrement verrouillée par le runtime et le quatrième validateur en service depuis un trimestre. Héberger un nœud de niveau 1 en serait le préalable.
 
 ## Arrêter, mettre à jour, retirer
 

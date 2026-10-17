@@ -1,5 +1,5 @@
-# QuantumHarmony, level 1 node: a sovereign copy of the registry.
-# No keys, no signing, no token, no inbound port. Outbound connections only.
+# QuantumHarmony, level 1 node: a full copy of the registry.
+# No validator key, no signing, no account, no inbound port. Outbound connections only.
 #
 #   docker compose -f level1/docker-compose.yml up -d
 #

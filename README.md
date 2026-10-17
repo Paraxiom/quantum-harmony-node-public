@@ -2,31 +2,31 @@
 
 Run a QuantumHarmony node with Docker.
 
-**QuantumHarmony** is a post-quantum Layer 1 chain: block seals and finality votes in SPHINCS+, entries in Falcon-512. It carries a public registry of commitments kept as full copies by its members. Test network, three validators plus a university full node, runtime version 47 since 6 October 2026.
+**QuantumHarmony** is a post-quantum Layer 1 chain: block seals and finality votes in SPHINCS+; entry signatures (Falcon-512) are stored, not verified. It carries a public registry of commitments. Test network, three validators, all operated by Paraxiom; runtime version 51 live since 9 October 2026 (the published source is version 47).
 
 ## Host a copy of the registry (level 1) — start here
 
-If you are an institution asked to hold a sovereign copy, use the level 1 kit and nothing else on this page:
+If you are an institution that wants to hold its own copy, use the level 1 kit and nothing else on this page:
 
 - English: [level1/README.md](level1/README.md)
 - Français : [level1/LISEZMOI.md](level1/LISEZMOI.md)
 
-One machine, outbound connections only, no keys, no signing, no token, no fee. `level1/join.sh` fetches the chainspec and a signed snapshot and starts the node; `level1/verify.sh` checks your copy against the network.
+One machine, outbound connections only, no validator key, no signing, no account. `level1/join.sh` fetches the chainspec and a signed snapshot and starts the node; `level1/verify.sh` checks your copy against the network.
 
 ## Check a document in your browser
 
 Both ways are read only. The file is fingerprinted on your own device and never sent anywhere. Neither page holds a key, signs anything or stores anything.
 
-- **With your own copy of the registry** (independent of Paraxiom): `cd level1 && ./verifier.sh` opens the "Vérifier un document" page against your node at 127.0.0.1:9944.
-- **Without installing anything:** [validateurs.paraxiom.org/demo](https://validateurs.paraxiom.org/demo/) reads the chain through Paraxiom's public read only gateway. Good for a first look; for a check that does not depend on Paraxiom, use your own copy.
+- **With your own copy of the registry**: `cd level1 && ./verifier.sh` opens the "Vérifier un document" page against your node at 127.0.0.1:9944, so your own copy answers.
+- **Without installing anything:** [validateurs.paraxiom.org/verifier](https://validateurs.paraxiom.org/verifier/) reads the chain through Paraxiom's public read only gateway, so Paraxiom's gateway answers. Good for a first look; to have your own copy answer, use the first way.
 
 Try it with `level1/verifier/exemples/proces-verbal-exemple.txt` (recorded, demonstration) and `proces-verbal-exemple-modifie.txt` (one amount changed: no record).
 
 ## Validator seats
 
-Validator seats (block production and finality signing) are **not open by self service**. They are offered by cohort to institutions that already host a level 1 node, once validator registration is fully gated by the runtime and the fourth validator has run for a quarter. The former "1-click validator onboarding" pipeline has been withdrawn for that reason. The material below describes the operator stack used by Paraxiom's own validators and is kept for reference.
+Validator seats (block production and finality signing) are **not open by self service**. They could be offered by cohort to institutions that already host a level 1 node, once validator registration is fully gated by the runtime and the fourth validator has run for a quarter. The former "1-click validator onboarding" pipeline has been withdrawn for that reason. The material below describes the operator stack used by Paraxiom's own validators and is kept for reference.
 
-**What is and is not post quantum today:** block seals and finality votes are SPHINCS+, entries are Falcon-512; the transport between validators is classical (libp2p Noise); a post quantum relay per connection has been validated on a devnet and is not yet in service.
+**What is and is not post quantum today:** block seals and finality votes are SPHINCS+, entry signatures (Falcon-512) are stored, not verified; the transport between validators is classical (libp2p Noise); a post quantum relay per connection has been validated on a devnet and is not yet in service.
 
 ## Prerequisites
 
@@ -54,7 +54,7 @@ docker-compose --version
 | ----------- | --------- | ----------- |
 | **RAM**     | 8 GB      | 16 GB       |
 | **Swap**    | 4 GB      | 4-8 GB      |
-| **Disk**    | 20 GB SSD | 50 GB SSD   |
+| **Disk**    | 500 GB SSD | 500 GB SSD |
 | **CPU**     | 2 cores   | 4 cores     |
 | **Network** | 10 Mbps   | 100 Mbps    |
 
@@ -62,7 +62,7 @@ docker-compose --version
 
 - SSD strongly recommended for sync performance
 - Swap space helps prevent OOM crashes during sync
-- Chain data grows over time (~10GB currently)
+- Chain data was about 116 GB on 2 October 2026 and grows about 1.3 GB a day
 - Higher bandwidth speeds up initial sync
 
 ## Quick Start
@@ -141,7 +141,7 @@ The dashboard launches automatically at **http://localhost:8080** when you run `
 | **REWARDS** | Not used: no rewards are paid on the test network. |
 | **RUNTIME** | Runtime version info and upgrade status. |
 | **KEYS** | Generate session keys, check keystore, rotate keys. Essential for validator setup. |
-| **QUANTUM** | Post-quantum security status — SPHINCS+/Falcon key health and algorithm info. |
+| **QUANTUM** | Post-quantum security status — SPHINCS+ key health and algorithm info. |
 | **NETWORK** | Live peer map, connection topology, bootnode status. |
 | **SIGNALS** | Network signals and event stream. |
 | **PROOFS** | On-chain proof verification and attestation status. |
@@ -168,7 +168,7 @@ QMHY is the chain's internal unit for transaction fees on the test network. It h
 
 The node, runtime and pallets are public: https://github.com/Paraxiom/quantumharmony-node-src
 (GPL-3.0 or a Paraxiom commercial licence for the node; Apache-2.0 for the runtime and pallets).
-It depends on our polkadot-sdk fork with SPHINCS+ and Falcon signatures:
+It depends on our polkadot-sdk fork with post-quantum signatures:
 https://github.com/Paraxiom/polkadot-sdk-pq
 
 ## Configuration
@@ -187,14 +187,13 @@ Replace `configs/chain-spec.json` with your chain spec.
 
 ## Network
 
-**Live nodes** (runtime specification 45, build `0.1.0-87e178d`, SPHINCS+ Aura block production plus a finality gadget):
+**Live nodes** (runtime specification 51, build `0.1.0-87e178d`, SPHINCS+ Aura block production plus a finality gadget):
 
 | Node | Operator | Role |
 |------|----------|------|
 | Alice | Paraxiom, Canada (OVH) | validator, bootnode |
 | Bob | Paraxiom, Canada (OVH) | validator, bootnode |
 | Charlie | Paraxiom | validator, bootnode |
-| paraxiom-scs | Carleton University | full node (level 1), since August 2026 |
 
 **Bootnodes:**
 

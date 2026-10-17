@@ -4,7 +4,7 @@
 
 ## PREREQUISITES
 - **OS:** Linux (Ubuntu 22.04 recommended) or macOS with Docker
-- **Hardware:** 4+ CPU cores, 8GB+ RAM, 100GB+ SSD
+- **Hardware:** 4+ CPU cores, 8GB+ RAM, 500GB SSD (the chain was about 116 GB on 2 October 2026 and grows about 1.3 GB a day)
 - **Network:** Public IP with port `30333` open (or NAT traversal configured)
 - **Tools:** Docker installed
 
