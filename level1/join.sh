@@ -121,12 +121,20 @@ docker volume inspect "$VOLUME" >/dev/null 2>&1 && free_vol=$(( free_vol + size 
 say "     disk ok: ${gb} GB to download, $(( free_here / 1000000000 )) GB free here, $(( free_vol / 1000000000 )) GB for Docker volumes"
 
 # Resumable: a dropped connection continues where it stopped when ./join.sh is run again.
+# A connection that goes silent (a new IP address, a laptop that slept, a Wi-Fi change) does
+# not always end with an error, and curl would wait on it forever. So curl gives up when less
+# than 1 kB/s arrives for two minutes, and the loop resumes. The try count starts again each
+# time the file grew, so a slow but moving link is never cut off.
 [ "$have" -gt "$size" ] && { rm -f snapshot.tar.gz; have=0; }   # left over from an older snapshot
 tries=0
 while [ "$have" -ne "$size" ]; do
   tries=$(( tries + 1 )); [ "$tries" -le 20 ] || die "snapshot download keeps failing; run ./join.sh again later to resume"
-  curl -fL -C - --progress-bar -o snapshot.tar.gz "$SNAPSHOT_URL" || { say "     connection lost, resuming in 10 s"; sleep 10; }
-  have=$(wc -c < snapshot.tar.gz | tr -d ' ')
+  before=$have
+  curl -fL -C - --connect-timeout 30 --speed-limit 1000 --speed-time 120 --progress-bar \
+       -o snapshot.tar.gz "$SNAPSHOT_URL" \
+    || { say "     connection lost or stalled, resuming in 10 s"; sleep 10; }
+  have=0; [ -f snapshot.tar.gz ] && have=$(wc -c < snapshot.tar.gz | tr -d ' ')
+  if [ "$have" -gt "$before" ]; then tries=0; fi
 done
 say "     checking the download (a few minutes)"
 got=$(sha256sum snapshot.tar.gz | awk '{print $1}')
